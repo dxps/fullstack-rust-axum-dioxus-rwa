@@ -26,6 +26,9 @@ reload_html = true
 # which files or dirs will be watcher monitoring
 watch_path = ["src", "public", "index.html"]
 
+# let the SPA to handle any non "/" path
+index_on_404 = true
+
 # include `assets` in web platform
 [web.resource]
 
