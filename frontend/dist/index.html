@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Conduit</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+    <!-- Import Ionicon icons & Google Fonts our Bootstrap theme relies on -->
+    <link href="//code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet" type="text/css">
+    <link
+        href="//fonts.googleapis.com/css?family=Titillium+Web:700|Source+Serif+Pro:400,700|Merriweather+Sans:400,700|Source+Sans+Pro:400,300,600,700,300italic,400italic,600italic,700italic"
+        rel="stylesheet" type="text/css">
+    <!-- Import the custom Bootstrap 4 theme from our hosted CDN -->
+    <link rel="stylesheet" href="//demo.productionready.io/main.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    
+</head>
+
+<body style="height: 100%;">
+
+    <div id="main"></div>
+
+    <script type="module">
+        import init from "/assets/dioxus/frontend.js";
+        init("/assets/dioxus/frontend_bg.wasm").then(wasm => {
+            if (wasm.__wbindgen_start == undefined) {
+                wasm.main();
+            }
+        });
+    </script>
+
+    
+
+</body>
+
+</html><script>// Dioxus-CLI
+// https://github.com/DioxusLabs/cli
+
+(function () {
+  var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  var url = protocol + '//' + window.location.host + '/_dioxus/ws';
+  var poll_interval = 8080;
+  var reload_upon_connect = () => {
+      window.setTimeout(
+          () => {
+              var ws = new WebSocket(url);
+              ws.onopen = () => window.location.reload();
+              ws.onclose = reload_upon_connect;
+          },
+          poll_interval);
+  };
+
+  var ws = new WebSocket(url);
+  ws.onmessage = (ev) => {
+      if (ev.data == "reload") {
+          window.location.reload();
+      }
+  };
+  ws.onclose = reload_upon_connect;
+})()</script>
