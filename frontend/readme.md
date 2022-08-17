@@ -4,6 +4,13 @@
 
 <br/>
 
+## Setup
+
+1. Install [Dioxus CLI](https://github.com/DioxusLabs/cli).
+2. Run the initial build using `dioxus build`.
+
+<br/>
+
 ## Usage
 
 ### Start
