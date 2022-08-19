@@ -1,6 +1,8 @@
 mod footer;
-mod navbar;
-
-// Exports with shorter paths.
 pub use footer::Footer;
+
+mod navbar;
 pub use navbar::NavBar;
+
+mod form;
+pub use form::*;
