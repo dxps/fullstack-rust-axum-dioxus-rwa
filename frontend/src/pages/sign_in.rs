@@ -1,7 +1,59 @@
-use dioxus::prelude::*;
+use dioxus::{
+    events::{FormData, MouseEvent},
+    prelude::*,
+};
+
+use crate::comps::{FormButton_Lg, FormInput_Lg};
 
 pub fn SignIn(cx: Scope) -> Element {
+    let email = use_state(&cx, String::new);
+    let password = use_state(&cx, String::new);
+
     cx.render(rsx! {
-        "Sign in"
+        div {
+            class: "auth-page",
+            div {
+                class: "container page",
+                div {
+                    class: "row",
+                    div {
+                        class: "col-md-6 offset-md-3 col-xs-12",
+                        h1 {
+                            class: "text-xs-center",
+                            "Sign in"
+                        }
+                        p {
+                            class: "text-xs-center",
+                            Link { to: "/signup", "Don't have an account?" }
+                        }
+                        br {}
+                        br {}
+
+                        ul {
+                            class: "error-messages",
+                            li { "Invalid credentials" }
+                        }
+
+                        form {
+                            FormInput_Lg {
+                                oninput: move |s: FormData| email.set(s.value),
+                                placeholder: "Email".to_string()
+                            }
+                            FormInput_Lg {
+                                oninput: move |s: FormData| password.set(s.value),
+                                placeholder: "Password".to_string()
+                            }
+                            FormButton_Lg {
+                                onclick: move |_: MouseEvent| {
+                                    log::info!("[SignIn] button clicked. email: {}", email);
+                                    // TODO: Call the corresponding (HTTP) API operation, and all the rest.
+                                },
+                                label: "Sign in".to_string()
+                            }
+                        }
+                    }
+                }
+            }
+        }
     })
 }

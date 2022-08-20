@@ -3,10 +3,9 @@ use dioxus::{
     prelude::*,
 };
 
-use crate::comps::{FormButton_Lg, FormField_Lg};
+use crate::comps::{FormButton_Lg, FormInput_Lg};
 
 pub fn SignUp(cx: Scope) -> Element {
-    //
     let name = use_state(&cx, String::new);
     let email = use_state(&cx, String::new);
     let password = use_state(&cx, String::new);
@@ -28,6 +27,8 @@ pub fn SignUp(cx: Scope) -> Element {
                             class: "text-xs-center",
                             Link { to: "/signin", "Have an account?" }
                         }
+                        br {}
+                        br {}
 
                         ul {
                             class: "error-messages",
@@ -35,24 +36,24 @@ pub fn SignUp(cx: Scope) -> Element {
                         }
 
                         form {
-                            FormField_Lg {
+                            FormInput_Lg {
                                 oninput: move |s: FormData| {
                                     name.set(s.value);
                                 },
                                 placeholder: "Your Name".to_string()
                             }
-                            FormField_Lg {
+                            FormInput_Lg {
                                 oninput: move |s: FormData| email.set(s.value),
                                 placeholder: "Email".to_string()
                             }
-                            FormField_Lg {
+                            FormInput_Lg {
                                 oninput: move |s: FormData| password.set(s.value),
                                 placeholder: "Password".to_string()
                             }
                             FormButton_Lg {
                                 onclick: move |_: MouseEvent| {
                                     log::info!("[SignUp] button clicked. name: {} | email: {}", name, email);
-                                    // TODO: Call the signup (HTTP) API operation, and all the rest. 
+                                    // TODO: Call the corresponding (HTTP) API operation, and all the rest. 
                                 },
                                 label: "Sign up".to_string()
                             }

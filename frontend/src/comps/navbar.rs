@@ -16,15 +16,17 @@ pub fn NavBar(cx: Scope) -> Element {
                     }
                     li {
                         class:"nav-item",
-                        a { class:"nav-link", href:"#",
-                            i { class:"ion-compose"},
-                            " New Article"
+                        Link {
+                            class: "nav-link", to: "/article_add",
+                            i { class: "ion-compose" },
+                            " New Article",
                         }
                     }
                     li {
                         class:"nav-item",
-                        a { class:"nav-link", href:"#",
-                            i { class:"ion-gear-a"},
+                        Link {
+                            class: "nav-link", to: "/settings",
+                            i { class: "ion-gear-a" },
                             " Settings"
                         }
                     }

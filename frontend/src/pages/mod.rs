@@ -1,8 +1,11 @@
 mod home;
-mod sign_in;
-mod sign_up;
+pub use home::*;
 
-// Exports with shorter paths.
-pub use home::HomePage;
-pub use sign_in::SignIn;
-pub use sign_up::SignUp;
+mod sign_in;
+pub use sign_in::*;
+
+mod sign_up;
+pub use sign_up::*;
+
+mod article_add;
+pub use article_add::*;

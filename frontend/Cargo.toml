@@ -4,14 +4,12 @@ version = "0.1.0"
 authors = ["dxps <marius.ileana@gmail.com>"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 dioxus = { version = "0.2.4", features = ["web", "router"] }
 
 log = "0.4.6"
+sir = { version = "0.2.2", features = [ "dioxus" ] }
 
 # WebAssembly Debug
 wasm-logger = "0.2.0"
 console_error_panic_hook = "0.1.7"
-sir = { version = "0.2.2", features = [ "dioxus" ] }
