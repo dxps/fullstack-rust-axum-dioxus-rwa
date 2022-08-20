@@ -9,3 +9,6 @@ pub use sign_up::*;
 
 mod article_add;
 pub use article_add::*;
+
+mod settings;
+pub use settings::*;

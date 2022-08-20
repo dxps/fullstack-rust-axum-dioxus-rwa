@@ -5,7 +5,7 @@ use dioxus::{
 
 use crate::comps::{FormButton_Lg, FormInput_Lg};
 
-pub fn SignIn(cx: Scope) -> Element {
+pub fn SignInPage(cx: Scope) -> Element {
     let email = use_state(&cx, String::new);
     let password = use_state(&cx, String::new);
 
@@ -45,7 +45,7 @@ pub fn SignIn(cx: Scope) -> Element {
                             }
                             FormButton_Lg {
                                 onclick: move |_: MouseEvent| {
-                                    log::info!("[SignIn] button clicked. email: {}", email);
+                                    log::info!("[SignInPage] button clicked. email: {}", email);
                                     // TODO: Call the corresponding (HTTP) API operation, and all the rest.
                                 },
                                 label: "Sign in".to_string()

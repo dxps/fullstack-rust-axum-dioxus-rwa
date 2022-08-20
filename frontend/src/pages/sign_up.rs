@@ -5,7 +5,7 @@ use dioxus::{
 
 use crate::comps::{FormButton_Lg, FormInput_Lg};
 
-pub fn SignUp(cx: Scope) -> Element {
+pub fn SignUpPage(cx: Scope) -> Element {
     let name = use_state(&cx, String::new);
     let email = use_state(&cx, String::new);
     let password = use_state(&cx, String::new);
@@ -37,9 +37,7 @@ pub fn SignUp(cx: Scope) -> Element {
 
                         form {
                             FormInput_Lg {
-                                oninput: move |s: FormData| {
-                                    name.set(s.value);
-                                },
+                                oninput: move |s: FormData| name.set(s.value),
                                 placeholder: "Your Name".to_string()
                             }
                             FormInput_Lg {
@@ -52,7 +50,7 @@ pub fn SignUp(cx: Scope) -> Element {
                             }
                             FormButton_Lg {
                                 onclick: move |_: MouseEvent| {
-                                    log::info!("[SignUp] button clicked. name: {} | email: {}", name, email);
+                                    log::info!("[SignUpPage] button clicked. name: {} | email: {}", name, email);
                                     // TODO: Call the corresponding (HTTP) API operation, and all the rest. 
                                 },
                                 label: "Sign up".to_string()

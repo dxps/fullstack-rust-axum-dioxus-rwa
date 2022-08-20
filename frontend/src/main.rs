@@ -4,7 +4,7 @@ mod comps;
 mod pages;
 
 use crate::comps::{Footer, NavBar};
-use crate::pages::{ArticleAdd, HomePage, SignIn, SignUp};
+use crate::pages::{ArticleAdd, HomePage, SettingsPage, SignInPage, SignUpPage};
 use dioxus::prelude::*;
 use sir::{global_css, AppStyle};
 
@@ -23,10 +23,11 @@ fn App(cx: Scope) -> Element {
         AppStyle{ },
         Router {
             NavBar { }
-            Route { to: "/", HomePage { }}
-            Route { to: "/signin", SignIn { }}
-            Route { to: "/signup", SignUp { }}
-            Route { to: "/article_add", ArticleAdd { }}
+            Route { to: "/", HomePage {} }
+            Route { to: "/signin", SignInPage {} }
+            Route { to: "/signup", SignUpPage {} }
+            Route { to: "/article_add", ArticleAdd {} }
+            Route { to: "/settings", SettingsPage {} }
             Footer{ }
         }
     ))
