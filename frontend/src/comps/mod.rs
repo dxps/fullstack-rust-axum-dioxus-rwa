@@ -1,8 +1,8 @@
 mod footer;
-pub use footer::Footer;
+pub use footer::*;
 
-mod navbar;
-pub use navbar::NavBar;
+mod header;
+pub use header::*;
 
 mod form;
 pub use form::*;

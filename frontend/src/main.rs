@@ -3,7 +3,7 @@
 mod comps;
 mod pages;
 
-use crate::comps::{Footer, NavBar};
+use crate::comps::{Footer, Header};
 use crate::pages::{ArticleAdd, HomePage, SettingsPage, SignInPage, SignUpPage};
 use dioxus::prelude::*;
 use sir::{global_css, AppStyle};
@@ -22,7 +22,7 @@ fn App(cx: Scope) -> Element {
     cx.render(rsx!(
         AppStyle{ },
         Router {
-            NavBar { }
+            Header { }
             Route { to: "/", HomePage {} }
             Route { to: "/signin", SignInPage {} }
             Route { to: "/signup", SignUpPage {} }

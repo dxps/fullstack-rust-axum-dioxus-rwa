@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-pub fn NavBar(cx: Scope) -> Element {
+pub fn Header(cx: Scope) -> Element {
     cx.render(rsx! {
         nav {
             class:"navbar navbar-light",
@@ -11,7 +11,7 @@ pub fn NavBar(cx: Scope) -> Element {
                     class:"nav navbar-nav pull-xs-right",
                     li {
                         class:"nav-item",
-                        // Add "active" class when you're on that page.
+                        // todo: Add "active" class when you're on that page.
                         Link { class:"nav-link active", to: "/", "Home" }
                     }
                     li {
