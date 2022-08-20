@@ -6,7 +6,7 @@ pub fn NavBar(cx: Scope) -> Element {
             class:"navbar navbar-light",
             div {
                 class: "container",
-                a { class:"navbar-brand", href: "/", "conduit" }
+                Link { class:"navbar-brand", to: "/", "conduit" }
                 ul {
                     class:"nav navbar-nav pull-xs-right",
                     li {
