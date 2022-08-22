@@ -8,7 +8,15 @@ state: `work-in-progress`
 
 ## Setup
 
-TODO: Database migration.
+### PostgreSQL Database
+
+Install the `sqlx-cli` using `cargo install --version=0.6.1 sqlx-cli --no-default-features --features postgres`.
+
+Run `./ops/init_db.sh` script that:
+- starts a PostgreSQL instance as a Docker container
+- runs the database migrations within.
+
+If the database container is already running, you can skip the container bootstrap using `SKIP_DOCKER=true ./scripts/init_db.sh`.
 
 <br/>
 
