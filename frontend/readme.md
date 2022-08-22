@@ -1,12 +1,15 @@
-# The Front-end Part
+# The Front-End Side
 
-`work-in-progress` This file will be updated accordingly.
+This is the Web UI side of the project.
+
+state: `work-in-progress`
 
 <br/>
 
 ## Setup
 
-1. Install [Dioxus CLI](https://github.com/DioxusLabs/cli).
+1. Install [Dioxus CLI](https://github.com/DioxusLabs/cli) to be able to use `dioxus` utility command.<br/>
+   Needed for doing the build and running in _dev mode_.
 2. Run the initial build using `dioxus build`.
 
 <br/>
@@ -15,10 +18,11 @@
 
 ### Start
 
-To start this project in _dev mode_ (detect changes and reload the page) use provided `run_dev.sh` script.
+To start this project in _dev mode_ (detect changes and reload the page), use `./run_dev.sh`.
 
+<br/>
 
-### Build
+## Build
 
 To package this project use `dioxus build --release`.
 
@@ -27,10 +31,10 @@ To package this project use `dioxus build --release`.
 ## Project Structure
 
 ```
-.project
-- public         # save the assets you want include and refer in the project.
-- src            # put your code
-- - comps        # where custom components are defined
-- - pages        # where "pages" (or views, considering SPA terminology)
-- - utils        # save some public function
+public         # save the assets you want include and refer in the project.
+src            # put your code
+ ╰──
+ ╰── comps      # where custom components are defined
+ ╰── pages      # where "pages" (or views, considering SPA terminology)
+ ╰── utils      # save some public function (tbd)
 ```
