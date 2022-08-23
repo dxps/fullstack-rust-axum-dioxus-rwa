@@ -8,9 +8,9 @@ if ! [ -x "$(command -v psql)" ]; then
 fi
 
 if ! [ -x "$(command -v sqlx)" ]; then
-  echo >&2 "Error: `sqlx` is not installed."
+  echo >&2 "Error: `sqlx` command is not available. `sqlx-cli` needs to be installed."
   echo >&2 "Use:"
-  echo >&2 "    cargo install --version=0.6.1 sqlx-cli --no-default-features --features postgres"
+  echo >&2 "    cargo install --version=0.6.1 sqlx-cli --features postgres"
   echo >&2 "to install it."
   exit 1
 fi
@@ -21,7 +21,7 @@ DB_IMAGE="postgres:14"
 DB_USER="${POSTGRES_USER:=fs_rs_rwa}"
 # Check if a custom password has been set, otherwise default to 'password'
 DB_PASSWORD="${POSTGRES_PASSWORD:=fs_rs_rwa}"
-# Check if a custom password has been set, otherwise default to 'newsletter'
+# Check if a custom password has been set, otherwise default to 'fs_rs_rwa'
 DB_NAME="${POSTGRES_DB:=fs_rs_rwa}"
 # Check if a custom port has been set, otherwise default to '5432'
 DB_PORT="${POSTGRES_PORT:=5441}"
