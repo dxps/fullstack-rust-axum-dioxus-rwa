@@ -1,0 +1,9 @@
+database:
+  host: "localhost"
+  port: 5441
+  username: "fs_rs_rwa"
+  password: "fs_rs_rwa"
+  name: "fs_rs_rwa"
+
+http:
+  port: 8080
