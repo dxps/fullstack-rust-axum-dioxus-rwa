@@ -30,7 +30,7 @@ The server supports a couple of options. Run `cargo run --bin server -- -h` to g
 
 ## Use
 
-For a quick heath check, access `http://localhost:8080/api/healthcheck`.
+For a quick health check, access `http://localhost:8080/api/healthcheck`.
 
 _more-to-come_
 
