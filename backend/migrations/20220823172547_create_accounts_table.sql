@@ -1,6 +1,7 @@
 -- Add migration script here
 create table if not exists accounts (
     id              serial          not null    primary key,
+    eid             char(36)        not null,
     email           varchar(255)    default ''  unique,
     username        varchar(255)    not null,
     gender          varchar(10)     default 'unknown',

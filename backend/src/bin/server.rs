@@ -1,47 +1,63 @@
 use std::{
     net::{IpAddr, Ipv6Addr, SocketAddr},
+    process::exit,
     str::FromStr,
+    sync::Arc,
 };
 
-use axum::{response::IntoResponse, routing::get, Router};
+use axum::{response::IntoResponse, routing::get, Extension, Json, Router};
 use axum_extra::routing::SpaRouter;
-use backend::config::get_config;
+use backend::{
+    config::get_config,
+    db::{init_db_pool, ping_db, DbConnPool},
+};
 use clap::Parser;
-use secrecy::ExposeSecret;
-use sqlx::postgres::PgPoolOptions;
+use serde_json::json;
 use tower_http::trace::TraceLayer;
+
+struct AppState {
+    db_conn_pool: DbConnPool,
+}
 
 #[tokio::main]
 async fn main() {
     let opt = Opt::parse();
 
+    // Logging init.
     if std::env::var("RUST_LOG").is_err() {
-        std::env::set_var("RUST_LOG", format!("{},hyper=info,mio=info", opt.log_level))
+        std::env::set_var(
+            "RUST_LOG",
+            format!("{},hyper=info,mio=info,sqlx=warn", opt.log_level),
+        )
     }
+    tracing_subscriber::fmt::init();
 
     // Load the config.
     let app_cfg = get_config().expect("Failed to load the app config.");
 
-    // Init db connection pool.
-    let db_conn_pool = PgPoolOptions::new()
-        .idle_timeout(std::time::Duration::from_secs(3))
-        // .connect_lazy(&app_cfg.database.connection_string().expose_secret())
-        .connect(&app_cfg.database.connection_string().expose_secret())
+    // Init the database connection pool.
+    let db_conn_pool = init_db_pool(&app_cfg)
         .await
-        .unwrap_or_else(|err| {
-            log::error!("Failed to connect to database: {}", err);
-            panic!("Failed to connect to database: {}", err);
-        });
-    // .expect("Failed to connect to database");
-    log::info!("Connected to the database ({} conns)", db_conn_pool.size());
+        .expect("Failed to connect to database.");
+    match ping_db(&db_conn_pool).await {
+        true => log::info!(
+            "Connected to the database (with {} conns)",
+            db_conn_pool.size()
+        ),
+        false => {
+            log::error!("Failed to ping the database. Exiting now.");
+            exit(1);
+        }
+    }
 
-    tracing_subscriber::fmt::init();
     let tracing_layer = TraceLayer::new_for_http();
+    let db_cp_layer = Arc::new(AppState { db_conn_pool });
 
     let http_svc = Router::new()
         .route("/api/healthcheck", get(health_check))
         .merge(SpaRouter::new("/assets", opt.assets_dir))
         .layer(tracing_layer)
+        .layer(Extension(db_cp_layer))
         .into_make_service();
 
     let sock_addr = SocketAddr::from((
@@ -56,8 +72,11 @@ async fn main() {
         .expect("Unable to start server");
 }
 
-async fn health_check() -> impl IntoResponse {
-    "OK"
+async fn health_check(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
+    match ping_db(&state.db_conn_pool).await {
+        true => Json(json!({ "database": "ok" })),
+        false => Json(json!({ "database": "err" })),
+    }
 }
 
 #[derive(Parser, Debug)]
