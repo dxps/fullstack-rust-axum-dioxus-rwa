@@ -5,19 +5,21 @@ use std::{
     sync::Arc,
 };
 
-use axum::{response::IntoResponse, routing::get, Extension, Json, Router};
+use axum::{
+    response::IntoResponse,
+    routing::{get, post},
+    Extension, Json, Router,
+};
 use axum_extra::routing::SpaRouter;
 use backend::{
     config::get_config,
-    db::{init_db_pool, ping_db, DbConnPool},
+    db::{init_db_pool, ping_db},
+    handlers::register_user,
+    AppState,
 };
 use clap::Parser;
 use serde_json::json;
 use tower_http::trace::TraceLayer;
-
-struct AppState {
-    db_conn_pool: DbConnPool,
-}
 
 #[tokio::main]
 async fn main() {
@@ -55,6 +57,7 @@ async fn main() {
 
     let http_svc = Router::new()
         .route("/api/healthcheck", get(health_check))
+        .route("/api/users", post(register_user))
         .merge(SpaRouter::new("/assets", opt.assets_dir))
         .layer(tracing_layer)
         .layer(Extension(db_cp_layer))
