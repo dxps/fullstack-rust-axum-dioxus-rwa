@@ -16,7 +16,8 @@ Run `./ops/init_db.sh` script that:
 - starts a PostgreSQL instance as a Docker container
 - runs the database migrations within.
 
-If the database container is already running, you can skip the container bootstrap using `SKIP_DOCKER=true ./ops/init_db.sh`. Additional details regarding database migrations are documented [ops](./ops/readme.md).
+If the database container is already running, you can skip the container bootstrap using `SKIP_DOCKER=true ./ops/init_db.sh`. 
+Additional details regarding database migrations are documented in [ops](./ops/readme.md).
 
 <br/>
 

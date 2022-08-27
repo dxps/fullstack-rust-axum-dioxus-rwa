@@ -40,7 +40,7 @@ async fn main() {
 
     let http_svc = Router::new()
         .route("/api/healthcheck", get(health_check))
-        .merge(SpaRouter::new("/assets", opt.static_dir))
+        .merge(SpaRouter::new("/assets", opt.assets_dir))
         .layer(tracing_layer)
         .into_make_service();
 
@@ -78,7 +78,7 @@ struct Opt {
     #[clap(short = 'l', long = "log", default_value = "info")]
     log_level: String,
 
-    /// The directory where static files are served from.
-    #[clap(long = "static-dir", default_value = "../dist")]
-    static_dir: String,
+    /// The directory where assets (static) files are served from (for `/assets/*` requests).
+    #[clap(short = 's', long = "assets-dir", default_value = "../dist")]
+    assets_dir: String,
 }
