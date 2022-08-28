@@ -29,7 +29,10 @@ async fn main() {
     if std::env::var("RUST_LOG").is_err() {
         std::env::set_var(
             "RUST_LOG",
-            format!("{},hyper=info,mio=info,sqlx=warn", opt.log_level),
+            format!(
+                "{},hyper=info,mio=info,sqlx=warn,tower_http=warn",
+                opt.log_level
+            ),
         )
     }
     tracing_subscriber::fmt::init();
@@ -53,14 +56,14 @@ async fn main() {
     }
 
     let tracing_layer = TraceLayer::new_for_http();
-    let db_cp_layer = Arc::new(AppState { db_conn_pool });
+    let app_state_layer = Arc::new(AppState::new(db_conn_pool));
 
     let http_svc = Router::new()
         .route("/api/healthcheck", get(health_check))
         .route("/api/users", post(register_user))
-        .merge(SpaRouter::new("/assets", opt.assets_dir))
         .layer(tracing_layer)
-        .layer(Extension(db_cp_layer))
+        .layer(Extension(app_state_layer))
+        .merge(SpaRouter::new("/assets", opt.assets_dir))
         .into_make_service();
 
     let sock_addr = SocketAddr::from((
@@ -76,7 +79,7 @@ async fn main() {
 }
 
 async fn health_check(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
-    match ping_db(&state.db_conn_pool).await {
+    match ping_db(&state.dbcp).await {
         true => Json(json!({ "database": "ok" })),
         false => Json(json!({ "database": "err" })),
     }
