@@ -16,22 +16,26 @@ impl FromRow<'_, PgRow> for User {
 }
 
 /// A Postgres specific implementation of `UserRepo`.
-pub struct UserRepoPg {
+pub struct UserRepo {
     dbcp: Arc<DbConnPool>,
 }
 
-impl UserRepoPg {
+impl UserRepo {
     pub fn new(dbcp: Arc<DbConnPool>) -> Self {
         Self { dbcp }
     }
 
     pub async fn save(&self, user: &User, password: String) -> Result<(), crate::AppError> {
-        log::debug!("Saving {:?}", user);
         let (pwd, salt) = Self::generate_password(password.into());
-        let _ = sqlx::query("INSERT INTO accounts(email, username, password, salt, bio, image) VALUES ($1, $2, $3, $4, $5, $6);")
-        .bind(&user.email).bind(&user.username)
-        .bind(pwd).bind(salt).bind(&user.bio).bind(&user.image)
-        .execute(self.dbcp.as_ref()).await?;
+        let _ = sqlx::query(
+            "INSERT INTO accounts(email, username, password, salt) VALUES ($1, $2, $3, $4);",
+        )
+        .bind(&user.email)
+        .bind(&user.username)
+        .bind(pwd)
+        .bind(salt)
+        .execute(self.dbcp.as_ref())
+        .await?;
         Ok(())
     }
 
