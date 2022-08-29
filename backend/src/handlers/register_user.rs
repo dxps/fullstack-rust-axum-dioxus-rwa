@@ -49,8 +49,8 @@ pub struct RegisterUserOutputUserKey {
 }
 
 pub async fn register_user(
-    Extension(state): Extension<Arc<AppState>>,
     Json(input): Json<RegisterUserInput>,
+    Extension(state): Extension<Arc<AppState>>,
 ) -> (StatusCode, Json<Value>) {
     let pwd = input.user.password.clone();
     let user: User = input.into();

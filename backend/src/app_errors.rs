@@ -11,7 +11,7 @@ pub enum AppError {
 
 impl From<sqlx::Error> for AppError {
     fn from(e: sqlx::Error) -> Self {
-        log::debug!("Converting error: {}", e);
+        log::debug!("From: {}", e);
         match e.into_database_error() {
             Some(e) => {
                 if let Some(ec) = e.code() {
