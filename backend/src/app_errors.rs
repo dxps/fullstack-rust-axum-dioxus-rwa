@@ -9,23 +9,27 @@ pub enum AppError {
     LoginWrongCredentialsErr,
 
     #[error("Unknown reason")]
-    UserRepoSaveUnknownErr,
+    UnknownErr,
 }
 
 impl From<sqlx::Error> for AppError {
     fn from(e: sqlx::Error) -> Self {
         log::debug!("From: {}", e);
-        match e.into_database_error() {
-            Some(e) => {
-                if let Some(ec) = e.code() {
-                    // FYI: See https://www.postgresql.org/docs/9.3/errcodes-appendix.html
-                    if ec == "23505" {
-                        return AppError::UserRepoSaveEmailAlreadyExistsErr;
+        match e {
+            sqlx::Error::RowNotFound => AppError::LoginWrongCredentialsErr,
+            _ => match e.into_database_error() {
+                Some(e) => {
+                    if let Some(ec) = e.code() {
+                        log::debug!("Is a db err with code {ec}");
+                        // FYI: See https://www.postgresql.org/docs/9.3/errcodes-appendix.html
+                        if ec == "23505" {
+                            return AppError::UserRepoSaveEmailAlreadyExistsErr;
+                        }
                     }
+                    AppError::UnknownErr
                 }
-                AppError::UserRepoSaveUnknownErr
-            }
-            None => AppError::UserRepoSaveUnknownErr,
+                None => AppError::UnknownErr,
+            },
         }
     }
 }

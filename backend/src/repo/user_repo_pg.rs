@@ -26,7 +26,7 @@ impl FromRow<'_, PgRow> for UserEntry {
                 email: row.get("email"),
                 username: row.get("username"),
                 bio: row.get("bio"),
-                image: row.get("image"),
+                image: row.try_get("image").unwrap_or_default(),
             },
             password: row.get("password"),
             salt: row.get("salt"),
@@ -59,7 +59,7 @@ impl UserRepo {
 
     pub async fn get_by_email(&self, email: &String) -> Result<UserEntry, AppError> {
         Ok(sqlx::query_as(
-            "SELECT username, password, salt, bio, image FROM accounts WHERE email = $1",
+            "SELECT email, username, password, salt, bio, image FROM accounts WHERE email = $1",
         )
         .bind(&email)
         .fetch_one(self.dbcp.as_ref())
