@@ -5,6 +5,9 @@ pub enum AppError {
     #[error("Email already exists")]
     UserRepoSaveEmailAlreadyExistsErr,
 
+    #[error("Wrong login credentials")]
+    LoginWrongCredentialsErr,
+
     #[error("Unknown reason")]
     UserRepoSaveUnknownErr,
 }

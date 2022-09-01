@@ -6,3 +6,15 @@ pub struct User {
     pub bio: String,
     pub image: String,
 }
+
+pub struct UserEntry {
+    pub user: User,
+    pub password: String,
+    pub salt: String,
+}
+
+impl Into<User> for UserEntry {
+    fn into(self) -> User {
+        self.user
+    }
+}

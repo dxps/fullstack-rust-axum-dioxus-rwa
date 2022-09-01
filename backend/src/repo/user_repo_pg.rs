@@ -2,7 +2,11 @@ use std::sync::Arc;
 
 use sqlx::{postgres::PgRow, FromRow, Row};
 
-use crate::{db::DbConnPool, domain::model::User};
+use crate::{
+    db::DbConnPool,
+    domain::model::{User, UserEntry},
+    AppError,
+};
 
 impl FromRow<'_, PgRow> for User {
     fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
@@ -11,6 +15,21 @@ impl FromRow<'_, PgRow> for User {
             username: row.get("username"),
             bio: row.get("bio"),
             image: row.get("image"),
+        })
+    }
+}
+
+impl FromRow<'_, PgRow> for UserEntry {
+    fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
+        Ok(Self {
+            user: User {
+                email: row.get("email"),
+                username: row.get("username"),
+                bio: row.get("bio"),
+                image: row.get("image"),
+            },
+            password: row.get("password"),
+            salt: row.get("salt"),
         })
     }
 }
@@ -25,8 +44,7 @@ impl UserRepo {
         Self { dbcp }
     }
 
-    pub async fn save(&self, user: &User, password: String) -> Result<(), crate::AppError> {
-        let (pwd, salt) = Self::generate_password(password.into());
+    pub async fn save(&self, user: &User, pwd: String, salt: String) -> Result<(), AppError> {
         let _ = sqlx::query(
             "INSERT INTO accounts(email, username, password, salt) VALUES ($1, $2, $3, $4);",
         )
@@ -39,11 +57,12 @@ impl UserRepo {
         Ok(())
     }
 
-    fn generate_password(pwd: String) -> (String, String) {
-        let salt: String = std::iter::repeat_with(fastrand::alphanumeric)
-            .take(12)
-            .collect();
-        let digest = md5::compute(format!("@{salt}${pwd}").as_bytes());
-        (format!("{:x}", digest), salt)
+    pub async fn get_by_email(&self, email: &String) -> Result<UserEntry, AppError> {
+        Ok(sqlx::query_as(
+            "SELECT username, password, salt, bio, image FROM accounts WHERE email = $1",
+        )
+        .bind(&email)
+        .fetch_one(self.dbcp.as_ref())
+        .await?)
     }
 }

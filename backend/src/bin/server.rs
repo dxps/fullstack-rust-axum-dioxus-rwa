@@ -14,7 +14,7 @@ use axum_extra::routing::SpaRouter;
 use backend::{
     config::get_config,
     db::{init_db_pool, ping_db},
-    handlers::register_user,
+    handlers::{login_user, register_user},
     AppState,
 };
 use clap::Parser;
@@ -60,6 +60,7 @@ async fn main() {
 
     let http_svc = Router::new()
         .route("/api/healthcheck", get(health_check))
+        .route("/api/users/login", post(login_user))
         .route("/api/users", post(register_user))
         .layer(tracing_layer)
         .layer(Extension(app_state_layer))

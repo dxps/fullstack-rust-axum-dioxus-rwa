@@ -1,15 +1,17 @@
 use std::sync::Arc;
 
 use axum::{http::StatusCode, Extension, Json};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::Value;
 
 use crate::{
     domain::model::User,
     handlers::{respond_bad_request, respond_internal_server_error},
-    AppError::{UserRepoSaveEmailAlreadyExistsErr, UserRepoSaveUnknownErr},
+    AppError::UserRepoSaveEmailAlreadyExistsErr,
     AppState,
 };
+
+use super::{UserAuthnOutputDTO, UserInfoDTO};
 
 #[derive(Debug, Deserialize)]
 pub struct RegisterUserInput {
@@ -34,20 +36,6 @@ pub struct RegisterUserInputUserKey {
     pub password: String,
 }
 
-#[derive(Debug, Serialize)]
-pub struct RegisterUserOutput {
-    pub user: RegisterUserOutputUserKey,
-}
-
-#[derive(Debug, Serialize)]
-pub struct RegisterUserOutputUserKey {
-    pub email: String,
-    pub token: String,
-    pub username: String,
-    pub bio: String,
-    pub image: String,
-}
-
 pub async fn register_user(
     Json(input): Json<RegisterUserInput>,
     Extension(state): Extension<Arc<AppState>>,
@@ -56,8 +44,8 @@ pub async fn register_user(
     let user: User = input.into();
     match &state.auth_mgr.register_user(&user, pwd).await {
         Ok(()) => {
-            let out = RegisterUserOutput {
-                user: RegisterUserOutputUserKey {
+            let out = UserAuthnOutputDTO {
+                user: UserInfoDTO {
                     email: user.email,
                     token: "TODO".to_string(),
                     username: user.username,
@@ -69,7 +57,7 @@ pub async fn register_user(
         }
         Err(err) => match err {
             UserRepoSaveEmailAlreadyExistsErr => respond_bad_request(err),
-            UserRepoSaveUnknownErr => respond_internal_server_error(err),
+            _ => respond_internal_server_error(err),
         },
     }
 }

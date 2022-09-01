@@ -26,3 +26,16 @@ where
         })),
     )
 }
+
+/// Utility function for responding with `401 Unauthorized` code and an error description.
+pub fn respond_unauthorized<E>(err: E) -> (StatusCode, Json<Value>)
+where
+    E: std::error::Error,
+{
+    (
+        StatusCode::UNAUTHORIZED,
+        Json(json!({
+            "error": err.to_string()
+        })),
+    )
+}
