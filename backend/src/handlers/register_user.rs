@@ -7,6 +7,7 @@ use serde_json::Value;
 use crate::{
     domain::model::User,
     handlers::{respond_bad_request, respond_internal_server_error},
+    jwt::sign,
     AppError::UserRepoSaveEmailAlreadyExistsErr,
     AppState,
 };
@@ -21,6 +22,7 @@ pub struct RegisterUserInput {
 impl Into<User> for RegisterUserInput {
     fn into(self) -> User {
         User {
+            id: 0, // not relevant
             email: self.user.email,
             username: self.user.username,
             bio: "".to_string(),
@@ -43,18 +45,21 @@ pub async fn register_user(
     let pwd = input.user.password.clone();
     let user: User = input.into();
     match &state.auth_mgr.register_user(&user, pwd).await {
-        Ok(()) => {
-            let out = UserAuthnOutputDTO {
-                user: UserInfoDTO {
-                    email: user.email,
-                    token: "TODO".to_string(),
-                    username: user.username,
-                    bio: "".to_string(),
-                    image: "".to_string(),
-                },
-            };
-            (StatusCode::OK, Json(serde_json::to_value(out).unwrap()))
-        }
+        Ok(id) => match sign(*id) {
+            Ok(token) => {
+                let out = UserAuthnOutputDTO {
+                    user: UserInfoDTO {
+                        email: user.email,
+                        token,
+                        username: user.username,
+                        bio: "".to_string(),
+                        image: "".to_string(),
+                    },
+                };
+                (StatusCode::OK, Json(serde_json::to_value(out).unwrap()))
+            }
+            Err(_) => todo!(),
+        },
         Err(err) => match err {
             UserRepoSaveEmailAlreadyExistsErr => respond_bad_request(err),
             _ => respond_internal_server_error(err),

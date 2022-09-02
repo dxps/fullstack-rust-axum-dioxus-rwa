@@ -12,6 +12,8 @@ pub enum AppUseCase {
     UserLogin,
 }
 
+pub type Result<T> = std::result::Result<T, AppError>;
+
 #[derive(Debug, Error)]
 pub enum AppError {
     #[error("email already exists")]
@@ -20,13 +22,16 @@ pub enum AppError {
     #[error("wrong credentials")]
     LoginWrongCredentialsErr,
 
+    #[error("invalid token")]
+    InvalidTokenErr,
+
     #[error("unknown reason")]
     UnknownErr,
 }
 
 impl From<(sqlx::Error, AppUseCase)> for AppError {
     fn from(ctx: (sqlx::Error, AppUseCase)) -> Self {
-        log::debug!("From ctx: {:?}", ctx);
+        log::debug!("From (sqlx err, case): {:?}", ctx);
         // Considering the use case first, then the possible errors within.
         match ctx.1 {
             AppUseCase::UserRegister => match ctx.0.into_database_error() {
@@ -46,5 +51,12 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
                 _ => AppError::UnknownErr,
             },
         }
+    }
+}
+
+impl From<jsonwebtoken::errors::Error> for AppError {
+    fn from(err: jsonwebtoken::errors::Error) -> Self {
+        log::debug!("From jwt err: {:?}", err);
+        AppError::InvalidTokenErr
     }
 }

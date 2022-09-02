@@ -4,7 +4,7 @@ use axum::{http::StatusCode, Extension, Json};
 use serde::Deserialize;
 use serde_json::Value;
 
-use crate::{AppError::LoginWrongCredentialsErr, AppState};
+use crate::{jwt::sign, AppError::LoginWrongCredentialsErr, AppState};
 
 use super::{respond_internal_server_error, respond_unauthorized, UserAuthnOutputDTO, UserInfoDTO};
 
@@ -28,18 +28,24 @@ pub async fn login_user(
         .login_user(input.user.email, input.user.password)
         .await
     {
-        Ok(user) => {
-            let out = UserAuthnOutputDTO {
-                user: UserInfoDTO {
-                    email: user.email,
-                    token: "TODO".to_string(),
-                    username: user.username,
-                    bio: user.bio,
-                    image: user.image,
-                },
-            };
-            (StatusCode::OK, Json(serde_json::to_value(out).unwrap()))
-        }
+        Ok(user) => match sign(user.id) {
+            Ok(token) => {
+                let out = UserAuthnOutputDTO {
+                    user: UserInfoDTO {
+                        email: user.email,
+                        token,
+                        username: user.username,
+                        bio: user.bio,
+                        image: user.image,
+                    },
+                };
+                (StatusCode::OK, Json(serde_json::to_value(out).unwrap()))
+            }
+            Err(err) => {
+                log::error!("Failed to create jwt: {err}");
+                respond_internal_server_error(err)
+            }
+        },
         Err(err) => match err {
             LoginWrongCredentialsErr => respond_unauthorized(err),
             _ => respond_internal_server_error(err),

@@ -13,12 +13,12 @@ impl AuthMgr {
     }
 
     /// Register a new `User`.
-    pub async fn register_user(&self, user: &User, pwd: String) -> Result<(), AppError> {
+    pub async fn register_user(&self, user: &User, pwd: String) -> Result<i64, AppError> {
         let (pwd, salt) = Self::generate_password(pwd.into());
         match self.user_repo.save(&user, pwd, salt).await {
-            Ok(()) => {
+            Ok(id) => {
                 log::debug!("Registered user with username {:?}.", user.username);
-                Ok(())
+                Ok(id)
             }
             Err(e) => {
                 log::error!(

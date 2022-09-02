@@ -8,4 +8,5 @@ pub mod config;
 pub mod db;
 pub mod domain;
 pub mod handlers;
+pub mod jwt;
 pub mod repo;
