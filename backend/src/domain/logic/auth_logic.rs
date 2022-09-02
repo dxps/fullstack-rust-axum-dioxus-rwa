@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{domain::model::User, repo::UserRepo, AppError};
+use crate::{domain::model::User, repo::UserRepo, AppError, AppUseCase};
 
 pub struct AuthMgr {
     user_repo: Arc<UserRepo>,
@@ -33,7 +33,11 @@ impl AuthMgr {
 
     /// Login a `User`.
     pub async fn login_user(&self, email: String, pwd: String) -> Result<User, AppError> {
-        match self.user_repo.get_by_email(&email).await {
+        match self
+            .user_repo
+            .get_by_email(&email, AppUseCase::UserLogin)
+            .await
+        {
             Ok(user_entry) => {
                 match Self::check_password(&pwd, &user_entry.password, &user_entry.salt) {
                     true => {

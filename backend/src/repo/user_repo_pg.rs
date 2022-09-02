@@ -5,7 +5,7 @@ use sqlx::{postgres::PgRow, FromRow, Row};
 use crate::{
     db::DbConnPool,
     domain::model::{User, UserEntry},
-    AppError,
+    AppError, AppUseCase,
 };
 
 impl FromRow<'_, PgRow> for User {
@@ -45,7 +45,7 @@ impl UserRepo {
     }
 
     pub async fn save(&self, user: &User, pwd: String, salt: String) -> Result<(), AppError> {
-        let _ = sqlx::query(
+        match sqlx::query(
             "INSERT INTO accounts(email, username, password, salt) VALUES ($1, $2, $3, $4);",
         )
         .bind(&user.email)
@@ -53,16 +53,27 @@ impl UserRepo {
         .bind(pwd)
         .bind(salt)
         .execute(self.dbcp.as_ref())
-        .await?;
-        Ok(())
+        .await
+        {
+            Ok(_) => Ok(()),
+            Err(err) => Err(AppError::from((err, AppUseCase::UserRegister))),
+        }
     }
 
-    pub async fn get_by_email(&self, email: &String) -> Result<UserEntry, AppError> {
-        Ok(sqlx::query_as(
+    pub async fn get_by_email(
+        &self,
+        email: &String,
+        usecase: AppUseCase,
+    ) -> Result<UserEntry, AppError> {
+        let entry = sqlx::query_as::<_, UserEntry>(
             "SELECT email, username, password, salt, bio, image FROM accounts WHERE email = $1",
         )
         .bind(&email)
         .fetch_one(self.dbcp.as_ref())
-        .await?)
+        .await;
+        match entry {
+            Ok(entry) => Ok(entry),
+            Err(err) => Err(AppError::from((err, usecase))),
+        }
     }
 }
