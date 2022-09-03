@@ -4,7 +4,7 @@ use axum::{http::StatusCode, Extension, Json};
 use serde::Deserialize;
 use serde_json::Value;
 
-use crate::{jwt::sign, AppError::LoginWrongCredentialsErr, AppState};
+use crate::{token::create_jwt, AppError::LoginWrongCredentialsErr, AppState};
 
 use super::{respond_internal_server_error, respond_unauthorized, UserOutDTO, UserOutDTOUserAttrs};
 
@@ -28,7 +28,7 @@ pub async fn login_user(
         .login_user(input.user.email, input.user.password)
         .await
     {
-        Ok(user) => match sign(user.id) {
+        Ok(user) => match create_jwt(user.id) {
             Ok(token) => {
                 let out = UserOutDTO {
                     user: UserOutDTOUserAttrs {

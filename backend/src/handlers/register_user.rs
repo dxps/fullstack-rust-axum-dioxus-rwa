@@ -7,7 +7,7 @@ use serde_json::Value;
 use crate::{
     domain::model::User,
     handlers::{respond_bad_request, respond_internal_server_error},
-    jwt::sign,
+    token::create_jwt,
     AppError::UserRepoSaveEmailAlreadyExistsErr,
     AppState,
 };
@@ -45,7 +45,7 @@ pub async fn register_user(
     let pwd = input.user.password.clone();
     let user: User = input.into();
     match &state.auth_mgr.register_user(&user, pwd).await {
-        Ok(id) => match sign(*id) {
+        Ok(id) => match create_jwt(*id) {
             Ok(token) => {
                 let out = UserOutDTO {
                     user: UserOutDTOUserAttrs {
