@@ -5,7 +5,7 @@ use serde_json::Value;
 
 use crate::{domain::model::UserId, AppState, AppUseCase};
 
-use super::{UserAuthnOutputDTO, UserInfoDTO};
+use super::{UserOutDTO, UserOutDTOUserAttrs};
 
 pub async fn get_current_user(
     user_id: UserId,
@@ -17,8 +17,8 @@ pub async fn get_current_user(
         .await
     {
         Ok(entry) => {
-            let out = UserAuthnOutputDTO {
-                user: UserInfoDTO {
+            let out = UserOutDTO {
+                user: UserOutDTOUserAttrs {
                     email: entry.user.email,
                     token: None,
                     username: entry.user.username,

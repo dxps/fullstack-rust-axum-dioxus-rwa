@@ -3,7 +3,7 @@ use serde_json::{json, Value};
 
 use crate::AppError;
 
-/// /// Utility function for responding with `500 Internal Server Error` code and an error description.
+/// Utility function for responding with `500 Internal Server Error` code and an error description.
 pub fn respond_internal_server_error<E>(err: E) -> (StatusCode, Json<Value>)
 where
     E: std::error::Error,
@@ -42,6 +42,7 @@ where
     )
 }
 
+// Implementation of Axum's `IntoResponse` trait, so that an `AppError` can be returned as part of an HTTP response.
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
         let status_code = match self {

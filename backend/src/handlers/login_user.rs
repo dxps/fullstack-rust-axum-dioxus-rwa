@@ -6,7 +6,7 @@ use serde_json::Value;
 
 use crate::{jwt::sign, AppError::LoginWrongCredentialsErr, AppState};
 
-use super::{respond_internal_server_error, respond_unauthorized, UserAuthnOutputDTO, UserInfoDTO};
+use super::{respond_internal_server_error, respond_unauthorized, UserOutDTO, UserOutDTOUserAttrs};
 
 #[derive(Debug, Deserialize)]
 pub struct LoginUserInput {
@@ -30,8 +30,8 @@ pub async fn login_user(
     {
         Ok(user) => match sign(user.id) {
             Ok(token) => {
-                let out = UserAuthnOutputDTO {
-                    user: UserInfoDTO {
+                let out = UserOutDTO {
+                    user: UserOutDTOUserAttrs {
                         email: user.email,
                         token: Some(token),
                         username: user.username,

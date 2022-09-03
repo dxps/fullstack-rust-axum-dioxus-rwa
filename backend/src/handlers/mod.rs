@@ -1,11 +1,11 @@
 // Registering the modules in the module tree and
 // re-exporting their entries with a shorter path.
 
-mod common_payloads;
-pub use common_payloads::*;
+mod payloads;
+pub use payloads::*;
 
-mod common_responses;
-pub use common_responses::*;
+mod responses;
+pub use responses::*;
 
 mod register_user;
 pub use register_user::*;

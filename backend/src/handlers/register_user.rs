@@ -12,7 +12,7 @@ use crate::{
     AppState,
 };
 
-use super::{UserAuthnOutputDTO, UserInfoDTO};
+use super::{UserOutDTO, UserOutDTOUserAttrs};
 
 #[derive(Debug, Deserialize)]
 pub struct RegisterUserInput {
@@ -47,8 +47,8 @@ pub async fn register_user(
     match &state.auth_mgr.register_user(&user, pwd).await {
         Ok(id) => match sign(*id) {
             Ok(token) => {
-                let out = UserAuthnOutputDTO {
-                    user: UserInfoDTO {
+                let out = UserOutDTO {
+                    user: UserOutDTOUserAttrs {
                         email: user.email,
                         token: Some(token),
                         username: user.username,
