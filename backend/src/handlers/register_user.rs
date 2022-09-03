@@ -26,7 +26,7 @@ impl Into<User> for RegisterUserInput {
             email: self.user.email,
             username: self.user.username,
             bio: "".to_string(),
-            image: "".to_string(),
+            image: None,
         }
     }
 }
@@ -53,7 +53,7 @@ pub async fn register_user(
                         token,
                         username: user.username,
                         bio: "".to_string(),
-                        image: "".to_string(),
+                        image: None,
                     },
                 };
                 (StatusCode::OK, Json(serde_json::to_value(out).unwrap()))

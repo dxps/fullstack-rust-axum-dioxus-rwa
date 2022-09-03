@@ -12,5 +12,5 @@ pub struct UserInfoDTO {
     pub token: String,
     pub username: String,
     pub bio: String,
-    pub image: String,
+    pub image: Option<String>,
 }

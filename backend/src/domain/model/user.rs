@@ -5,7 +5,7 @@ pub struct User {
     pub email: String,
     pub username: String,
     pub bio: String,
-    pub image: String,
+    pub image: Option<String>,
 }
 
 pub struct UserEntry {
