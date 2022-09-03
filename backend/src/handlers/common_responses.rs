@@ -1,5 +1,7 @@
-use axum::{http::StatusCode, Json};
+use axum::{http::StatusCode, response::IntoResponse, Json};
 use serde_json::{json, Value};
+
+use crate::AppError;
 
 /// /// Utility function for responding with `500 Internal Server Error` code and an error description.
 pub fn respond_internal_server_error<E>(err: E) -> (StatusCode, Json<Value>)
@@ -38,4 +40,15 @@ where
             "error": err.to_string()
         })),
     )
+}
+
+impl IntoResponse for AppError {
+    fn into_response(self) -> axum::response::Response {
+        let status_code = match self {
+            AppError::AuthUnauthorizedErr => StatusCode::UNAUTHORIZED,
+            AppError::InvalidTokenErr => StatusCode::UNAUTHORIZED,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
+        };
+        status_code.into_response()
+    }
 }

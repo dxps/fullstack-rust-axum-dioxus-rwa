@@ -50,7 +50,7 @@ pub async fn register_user(
                 let out = UserAuthnOutputDTO {
                     user: UserInfoDTO {
                         email: user.email,
-                        token,
+                        token: Some(token),
                         username: user.username,
                         bio: "".to_string(),
                         image: None,

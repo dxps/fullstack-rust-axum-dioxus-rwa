@@ -33,7 +33,7 @@ pub async fn login_user(
                 let out = UserAuthnOutputDTO {
                     user: UserInfoDTO {
                         email: user.email,
-                        token,
+                        token: Some(token),
                         username: user.username,
                         bio: user.bio,
                         image: user.image,

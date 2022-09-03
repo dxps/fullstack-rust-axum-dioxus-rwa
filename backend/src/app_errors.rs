@@ -11,6 +11,7 @@ use thiserror::Error;
 pub enum AppUseCase {
     UserRegister,
     UserLogin,
+    AnyTokenProtectedOperation,
 }
 
 pub type Result<T> = std::result::Result<T, AppError>;
@@ -22,6 +23,9 @@ pub enum AppError {
 
     #[error("wrong credentials")]
     LoginWrongCredentialsErr,
+
+    #[error("unauthorized")]
+    AuthUnauthorizedErr,
 
     #[error("invalid token")]
     InvalidTokenErr,
@@ -51,6 +55,8 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
                 sqlx::Error::RowNotFound => AppError::LoginWrongCredentialsErr,
                 _ => AppError::InternalErr,
             },
+            // Anything else is treated as an internal error.
+            _ => AppError::InternalErr,
         }
     }
 }

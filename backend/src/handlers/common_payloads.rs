@@ -9,7 +9,8 @@ pub struct UserAuthnOutputDTO {
 #[derive(Debug, Serialize)]
 pub struct UserInfoDTO {
     pub email: String,
-    pub token: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
     pub username: String,
     pub bio: String,
     pub image: Option<String>,

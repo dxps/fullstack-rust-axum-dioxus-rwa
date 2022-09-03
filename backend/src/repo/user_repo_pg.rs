@@ -4,7 +4,7 @@ use sqlx::{postgres::PgRow, FromRow, Row};
 
 use crate::{
     db::DbConnPool,
-    domain::model::{User, UserEntry},
+    domain::model::{User, UserEntry, UserId},
     AppError, AppUseCase,
 };
 
@@ -24,7 +24,7 @@ impl FromRow<'_, PgRow> for UserEntry {
     fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
         Ok(Self {
             user: User {
-                id: row.get("id"),
+                id: row.try_get("id").unwrap_or_default(),
                 email: row.get("email"),
                 username: row.get("username"),
                 bio: row.get("bio"),
@@ -71,6 +71,19 @@ impl UserRepo {
             "SELECT id, email, username, password, salt, bio, image FROM accounts WHERE email = $1",
         )
         .bind(&email)
+        .fetch_one(self.dbcp.as_ref())
+        .await;
+        match entry {
+            Ok(entry) => Ok(entry),
+            Err(err) => Err(AppError::from((err, usecase))),
+        }
+    }
+
+    pub async fn get_by_id(&self, id: UserId, usecase: AppUseCase) -> Result<UserEntry, AppError> {
+        let entry = sqlx::query_as::<_, UserEntry>(
+            "SELECT email, username, password, salt, bio, image FROM accounts WHERE id = $1",
+        )
+        .bind(id.as_value())
         .fetch_one(self.dbcp.as_ref())
         .await;
         match entry {
