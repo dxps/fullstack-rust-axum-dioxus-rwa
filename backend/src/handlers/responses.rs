@@ -42,13 +42,16 @@ where
     )
 }
 
-// Implementation of Axum's `IntoResponse` trait, so that an `AppError` can be returned as part of an HTTP response.
+// Implementation of Axum's `IntoResponse` trait, so that an `AppError` can be converted into an HTTP response.
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
+        let body = Json(json!({
+            "error": self.to_string()
+        }));
         let status_code = match self {
-            AppError::AuthUnauthorizedErr => StatusCode::UNAUTHORIZED,
-            AppError::InvalidTokenErr => StatusCode::UNAUTHORIZED,
-            _ => StatusCode::INTERNAL_SERVER_ERROR,
+            AppError::AuthUnauthorizedErr => (StatusCode::UNAUTHORIZED, Json(Value::default())),
+            AppError::InvalidTokenErr(_) => (StatusCode::UNAUTHORIZED, body),
+            _ => (StatusCode::INTERNAL_SERVER_ERROR, body),
         };
         status_code.into_response()
     }

@@ -27,9 +27,11 @@ pub enum AppError {
     #[error("unauthorized")]
     AuthUnauthorizedErr,
 
-    #[error("invalid token")]
-    InvalidTokenErr,
+    #[error("invalid token: {0}")]
+    InvalidTokenErr(String),
 
+    // #[error("expired token")]
+    // TokenExpiredErr,
     #[error("internal error")]
     InternalErr,
 }
@@ -64,6 +66,6 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
 impl From<jsonwebtoken::errors::Error> for AppError {
     fn from(err: jsonwebtoken::errors::Error) -> Self {
         log::debug!("From jwt err: {:?}", err);
-        AppError::InvalidTokenErr
+        AppError::InvalidTokenErr(err.to_string())
     }
 }

@@ -1,4 +1,4 @@
-use crate::app_errors::Result;
+use crate::{app_errors::Result, AppError};
 use chrono::Duration;
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
@@ -14,7 +14,7 @@ pub struct Claims {
 impl Claims {
     pub fn new(id: i64) -> Self {
         let iat = Utc::now();
-        let exp = iat + Duration::hours(24);
+        let exp = iat + Duration::minutes(5);
 
         Self {
             sub: id,
@@ -33,10 +33,14 @@ pub fn sign(id: i64) -> Result<String> {
 }
 
 pub fn verify(token: &str) -> Result<Claims> {
-    Ok(jsonwebtoken::decode(
+    let claims: Claims = jsonwebtoken::decode(
         token,
         &DecodingKey::from_secret("TODO_JWT_SECRET_AS_CONFIG".as_bytes()),
         &Validation::default(),
     )
-    .map(|data| data.claims)?)
+    .map(|data| data.claims)?;
+    match claims.exp > Utc::now().timestamp() {
+        true => Ok(claims),
+        false => Err(AppError::InvalidTokenErr("token is expired".to_string())),
+    }
 }

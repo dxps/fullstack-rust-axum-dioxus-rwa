@@ -30,7 +30,7 @@ where
             }
             Err(err) => {
                 log::debug!("Token verification failed: {err}");
-                Err(AppError::InvalidTokenErr)
+                Err(err)
             }
         }
     }
