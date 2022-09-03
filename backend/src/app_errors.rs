@@ -4,6 +4,7 @@
 //!
 //! Different cases are considered such as:
 //! - for a database error with code 23505 (see its [postgres specifics](https://www.postgresql.org/docs/9.3/errcodes-appendix.html))
+
 use thiserror::Error;
 
 #[derive(Debug)]
@@ -25,8 +26,8 @@ pub enum AppError {
     #[error("invalid token")]
     InvalidTokenErr,
 
-    #[error("unknown reason")]
-    UnknownErr,
+    #[error("internal error")]
+    InternalErr,
 }
 
 impl From<(sqlx::Error, AppUseCase)> for AppError {
@@ -34,21 +35,21 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
         log::debug!("From (sqlx err, case): {:?}", ctx);
         // Considering the use case first, then the possible errors within.
         match ctx.1 {
+            // User Registration case
             AppUseCase::UserRegister => match ctx.0.into_database_error() {
-                Some(e) => {
-                    if let Some(ec) = e.code() {
-                        log::debug!("It's a db err with code {ec}");
-                        if ec == "23505" {
-                            return AppError::UserRepoSaveEmailAlreadyExistsErr;
-                        }
-                    }
-                    AppError::UnknownErr
-                }
-                None => AppError::UnknownErr,
+                Some(e) => match e.code() {
+                    Some(code) => match code.as_ref() {
+                        "23505" => AppError::UserRepoSaveEmailAlreadyExistsErr,
+                        _ => AppError::InternalErr,
+                    },
+                    None => AppError::InternalErr,
+                },
+                None => AppError::InternalErr,
             },
+            // User Login case
             AppUseCase::UserLogin => match ctx.0 {
                 sqlx::Error::RowNotFound => AppError::LoginWrongCredentialsErr,
-                _ => AppError::UnknownErr,
+                _ => AppError::InternalErr,
             },
         }
     }
