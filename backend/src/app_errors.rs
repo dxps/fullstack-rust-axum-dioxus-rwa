@@ -12,6 +12,7 @@ pub enum AppUseCase {
     UserRegister,
     UserLogin,
     AnyTokenProtectedOperation,
+    UpdateUser,
 }
 
 pub type Result<T> = std::result::Result<T, AppError>;
@@ -26,6 +27,9 @@ pub enum AppError {
 
     #[error("unauthorized")]
     AuthUnauthorizedErr,
+
+    #[error("invalid input")]
+    InvalidInput,
 
     #[error("invalid token: {0}")]
     InvalidTokenErr(String),

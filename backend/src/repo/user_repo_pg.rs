@@ -79,7 +79,7 @@ impl UserRepo {
         }
     }
 
-    pub async fn get_by_id(&self, id: UserId, usecase: AppUseCase) -> Result<UserEntry, AppError> {
+    pub async fn get_by_id(&self, id: &UserId, usecase: AppUseCase) -> Result<UserEntry, AppError> {
         let entry = sqlx::query_as::<_, UserEntry>(
             "SELECT email, username, password, salt, bio, image FROM accounts WHERE id = $1",
         )
@@ -89,6 +89,43 @@ impl UserRepo {
         match entry {
             Ok(entry) => Ok(entry),
             Err(err) => Err(AppError::from((err, usecase))),
+        }
+    }
+
+    pub async fn update_by_id(
+        &self,
+        id: UserId,
+        email: Option<String>,
+        bio: Option<String>,
+        image: Option<String>,
+    ) -> Result<UserEntry, AppError> {
+        if email.is_none() && bio.is_none() && image.is_none() {
+            return Err(AppError::InvalidInput);
+        }
+        match self.get_by_id(&id, AppUseCase::UpdateUser).await {
+            Ok(mut entry) => {
+                entry.user.email = email.unwrap_or_else(|| entry.user.email);
+                entry.user.bio = bio.unwrap_or_else(|| entry.user.bio);
+                entry.user.image = if image.is_some() {
+                    image
+                } else {
+                    entry.user.image
+                };
+                match sqlx::query(
+                    "UPDATE accounts SET email = $1, bio = $2, image = $3 WHERE id = $4",
+                )
+                .bind(&entry.user.email)
+                .bind(&entry.user.bio)
+                .bind(&entry.user.image)
+                .bind(id.as_value())
+                .execute(self.dbcp.as_ref())
+                .await
+                {
+                    Ok(_) => Ok(entry),
+                    Err(err) => Err(AppError::from((err, AppUseCase::UpdateUser))),
+                }
+            }
+            Err(err) => Err(err),
         }
     }
 }

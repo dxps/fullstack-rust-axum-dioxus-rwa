@@ -14,7 +14,7 @@ use axum_extra::routing::SpaRouter;
 use backend::{
     config::get_config,
     db::{init_db_pool, ping_db},
-    handlers::{get_current_user, login_user, register_user},
+    handlers::{get_current_user, login_user, register_user, update_current_user},
     AppState,
 };
 use clap::Parser;
@@ -62,7 +62,7 @@ async fn main() {
         .route("/api/healthcheck", get(health_check))
         .route("/api/users/login", post(login_user))
         .route("/api/users", post(register_user))
-        .route("/api/user", get(get_current_user))
+        .route("/api/user", get(get_current_user).put(update_current_user))
         .layer(tracing_layer)
         .layer(Extension(app_state_layer))
         .merge(SpaRouter::new("/assets", opt.assets_dir))

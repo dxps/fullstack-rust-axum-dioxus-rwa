@@ -13,7 +13,7 @@ pub async fn get_current_user(
 ) -> (StatusCode, Json<Value>) {
     match state
         .user_repo
-        .get_by_id(user_id, AppUseCase::AnyTokenProtectedOperation)
+        .get_by_id(&user_id, AppUseCase::AnyTokenProtectedOperation)
         .await
     {
         Ok(entry) => {

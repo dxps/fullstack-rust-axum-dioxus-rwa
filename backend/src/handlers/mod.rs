@@ -16,5 +16,8 @@ pub use login_user::*;
 mod get_curr_user;
 pub use get_curr_user::*;
 
+mod update_curr_user;
+pub use update_curr_user::*;
+
 mod token_claims_extractor;
 pub use token_claims_extractor::*;

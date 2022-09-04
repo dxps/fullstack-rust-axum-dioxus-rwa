@@ -20,8 +20,7 @@ where
     async fn from_request(
         req: &mut axum::extract::RequestParts<B>,
     ) -> Result<Self, Self::Rejection> {
-        // Extract the token from the Authorization HTTP header with "Bearer <token>" value.
-        // let token = TypedHeader::<Authorization<Bearer>>::from_request(req)
+        // Extract the token from the Authorization (HTTP request) header having the value of "Bearer <token>".
         let token = TypedHeader::<Authorization<Token>>::from_request(req)
             .await
             .map_err(|err| {
@@ -31,7 +30,7 @@ where
 
         match token::verify_jwt(token.0 .0.token()) {
             Ok(claims) => {
-                // We just extract and provide the user (aka jwt subject) id.
+                // We just extract and provide the user (aka subject or JWT's `sub`) id.
                 Ok(claims.sub.into())
             }
             Err(err) => {
