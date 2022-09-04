@@ -3,9 +3,9 @@ use std::sync::Arc;
 use axum::{http::StatusCode, Extension, Json};
 use serde_json::Value;
 
-use crate::{domain::model::UserId, AppState, AppUseCase};
+use crate::{domain::model::UserId, AppError, AppState, AppUseCase};
 
-use super::{UserOutDTO, UserOutDTOUserAttrs};
+use super::{respond_internal_server_error, respond_unauthorized, UserOutDTO, UserOutDTOUserAttrs};
 
 pub async fn get_current_user(
     user_id: UserId,
@@ -28,6 +28,10 @@ pub async fn get_current_user(
             };
             (StatusCode::OK, Json(serde_json::to_value(out).unwrap()))
         }
-        Err(_) => todo!(),
+        Err(err) => match err {
+            AppError::AuthUnauthorizedErr => respond_unauthorized(err),
+            AppError::InvalidTokenErr(msg) => respond_unauthorized(AppError::InvalidTokenErr(msg)),
+            _ => respond_internal_server_error(err),
+        },
     }
 }
