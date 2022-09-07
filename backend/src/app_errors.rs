@@ -13,6 +13,7 @@ pub enum AppUseCase {
     UserLogin,
     AnyTokenProtectedOperation,
     UpdateUser,
+    GetUserProfile,
 }
 
 pub type Result<T> = std::result::Result<T, AppError>;
@@ -34,6 +35,9 @@ pub enum AppError {
     #[error("invalid token: {0}")]
     InvalidTokenErr(String),
 
+    #[error("entry not found")]
+    NothingFound,
+
     // #[error("expired token")]
     // TokenExpiredErr,
     #[error("internal error")]
@@ -45,7 +49,6 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
         log::debug!("From (sqlx err, case): {:?}", ctx);
         // Considering the use case first, then the possible errors within.
         match ctx.1 {
-            // User Registration case
             AppUseCase::UserRegister => match ctx.0.into_database_error() {
                 Some(e) => match e.code() {
                     Some(code) => match code.as_ref() {
@@ -56,14 +59,27 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
                 },
                 None => AppError::InternalErr,
             },
-            // User Login case
+
             AppUseCase::UserLogin => match ctx.0 {
                 sqlx::Error::RowNotFound => AppError::LoginWrongCredentialsErr,
                 _ => AppError::InternalErr,
             },
+
+            AppUseCase::GetUserProfile => match ctx.0 {
+                sqlx::Error::RowNotFound => AppError::NothingFound,
+                _ => AppError::InternalErr,
+            },
+
             // Anything else is treated as an internal error.
             _ => AppError::InternalErr,
         }
+    }
+}
+
+impl From<sqlx::Error> for AppError {
+    fn from(err: sqlx::Error) -> Self {
+        log::debug!("From sqlx err: {:?}", err);
+        AppError::InternalErr
     }
 }
 

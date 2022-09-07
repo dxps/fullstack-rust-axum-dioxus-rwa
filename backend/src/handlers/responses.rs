@@ -42,6 +42,19 @@ where
     )
 }
 
+/// Utility function for responding with `400 Bad Request` code and an error description.
+pub fn respond_not_found<E>(err: E) -> (StatusCode, Json<Value>)
+where
+    E: std::error::Error,
+{
+    (
+        StatusCode::NOT_FOUND,
+        Json(json!({
+            "error": err.to_string()
+        })),
+    )
+}
+
 // Implementation of Axum's `IntoResponse` trait, so that an `AppError` can be converted into an HTTP response.
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {

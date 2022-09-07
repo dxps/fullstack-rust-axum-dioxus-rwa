@@ -1,11 +1,16 @@
+//
 // Registering the modules in the module tree and
 // re-exporting their entries with a shorter path.
+//
 
-mod payloads;
-pub use payloads::*;
+mod dtos;
+pub use dtos::*;
 
 mod responses;
 pub use responses::*;
+
+mod token_claims_extractor;
+pub use token_claims_extractor::*;
 
 mod register_user;
 pub use register_user::*;
@@ -19,5 +24,5 @@ pub use get_curr_user::*;
 mod update_curr_user;
 pub use update_curr_user::*;
 
-mod token_claims_extractor;
-pub use token_claims_extractor::*;
+mod get_user_profile;
+pub use get_user_profile::*;

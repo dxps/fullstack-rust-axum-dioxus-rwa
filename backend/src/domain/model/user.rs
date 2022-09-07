@@ -1,4 +1,7 @@
+use serde::Serialize;
+
 /// The (public) id of the User.
+#[derive(Debug, Serialize)]
 pub struct UserId(i64);
 
 impl UserId {
