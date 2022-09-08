@@ -14,6 +14,7 @@ pub enum AppUseCase {
     AnyTokenProtectedOperation,
     UpdateUser,
     GetUserProfile,
+    FollowUser,
 }
 
 pub type Result<T> = std::result::Result<T, AppError>;
@@ -38,18 +39,20 @@ pub enum AppError {
     #[error("entry not found")]
     NothingFound,
 
-    // #[error("expired token")]
-    // TokenExpiredErr,
     #[error("internal error")]
     InternalErr,
+
+    #[error("")]
+    IgnorableErr,
 }
 
 impl From<(sqlx::Error, AppUseCase)> for AppError {
     fn from(ctx: (sqlx::Error, AppUseCase)) -> Self {
         log::debug!("From (sqlx err, case): {:?}", ctx);
+        let err = ctx.0;
         // Considering the use case first, then the possible errors within.
         match ctx.1 {
-            AppUseCase::UserRegister => match ctx.0.into_database_error() {
+            AppUseCase::UserRegister => match &err.into_database_error() {
                 Some(e) => match e.code() {
                     Some(code) => match code.as_ref() {
                         "23505" => AppError::UserRepoSaveEmailAlreadyExistsErr,
@@ -60,14 +63,25 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
                 None => AppError::InternalErr,
             },
 
-            AppUseCase::UserLogin => match ctx.0 {
+            AppUseCase::UserLogin => match &err {
                 sqlx::Error::RowNotFound => AppError::LoginWrongCredentialsErr,
                 _ => AppError::InternalErr,
             },
 
-            AppUseCase::GetUserProfile => match ctx.0 {
+            AppUseCase::GetUserProfile => match &err {
                 sqlx::Error::RowNotFound => AppError::NothingFound,
                 _ => AppError::InternalErr,
+            },
+
+            AppUseCase::FollowUser => match &err.into_database_error() {
+                Some(dbe) => match dbe.code() {
+                    Some(code) => match code.as_ref() {
+                        "23505" => AppError::IgnorableErr,
+                        _ => AppError::InternalErr,
+                    },
+                    None => AppError::InternalErr,
+                },
+                None => AppError::InternalErr,
             },
 
             // Anything else is treated as an internal error.

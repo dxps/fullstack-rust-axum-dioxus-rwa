@@ -42,7 +42,7 @@ where
     )
 }
 
-/// Utility function for responding with `400 Bad Request` code and an error description.
+/// Utility function for responding with `404 Not Found` code and an error description.
 pub fn respond_not_found<E>(err: E) -> (StatusCode, Json<Value>)
 where
     E: std::error::Error,

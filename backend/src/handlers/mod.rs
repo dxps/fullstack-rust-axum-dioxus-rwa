@@ -26,3 +26,6 @@ pub use update_curr_user::*;
 
 mod get_user_profile;
 pub use get_user_profile::*;
+
+mod follow_user;
+pub use follow_user::*;

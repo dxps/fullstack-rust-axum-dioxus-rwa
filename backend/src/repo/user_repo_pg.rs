@@ -65,6 +65,31 @@ impl UserRepo {
         }
     }
 
+    pub async fn follow_user(
+        &self,
+        user_id: &UserId,
+        followed_username: &String,
+    ) -> Result<UserProfileDTO, AppError> {
+        // First, get the followed user_id.
+        let followed_user_id =
+            sqlx::query_as::<_, UserId>("SELECT id FROM accounts WHERE username = $1")
+                .bind(followed_username)
+                .fetch_one(self.dbcp.as_ref())
+                .await?;
+        match sqlx::query("INSERT INTO followings VALUES($1, $2)")
+            .bind(user_id.as_value())
+            .bind(followed_user_id.as_value())
+            .execute(self.dbcp.as_ref())
+            .await
+        {
+            Ok(_) => {
+                self.get_profile_by_username(followed_username, AppUseCase::FollowUser)
+                    .await
+            }
+            Err(err) => Err(AppError::from((err, AppUseCase::FollowUser))),
+        }
+    }
+
     pub async fn get_profile_by_username(
         &self,
         username: &String,
@@ -154,6 +179,12 @@ impl FromRow<'_, PgRow> for User {
             bio: row.get("bio"),
             image: row.get("image"),
         })
+    }
+}
+
+impl FromRow<'_, PgRow> for UserId {
+    fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
+        Ok(UserId::from(row.get::<i64, _>("id")))
     }
 }
 
