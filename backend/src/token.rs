@@ -44,7 +44,9 @@ pub fn verify_jwt(token: &str) -> Result<Claims> {
     .map(|data| data.claims)?;
     match claims.exp > Utc::now().timestamp() {
         true => Ok(claims),
-        false => Err(AppError::InvalidTokenErr("token is expired".to_string())),
+        false => Err(AppError::AuthInvalidTokenErr(
+            "token is expired".to_string(),
+        )),
     }
 }
 

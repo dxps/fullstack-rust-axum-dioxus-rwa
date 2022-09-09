@@ -25,7 +25,7 @@ where
             .await
             .map_err(|err| {
                 log::debug!("Failed to extract the token: {}", err);
-                AppError::AuthUnauthorizedErr
+                AppError::AuthUnauthorized
             })?;
 
         match token::verify_jwt(token.0 .0.token()) {

@@ -4,7 +4,7 @@ use axum::{http::StatusCode, Extension, Json};
 use serde::Deserialize;
 use serde_json::Value;
 
-use crate::{token::create_jwt, AppError::LoginWrongCredentialsErr, AppState};
+use crate::{token::create_jwt, AppError::AuthLoginFailed, AppState};
 
 use super::{respond_internal_server_error, respond_unauthorized, UserOutDTO, UserOutDTOUserAttrs};
 
@@ -47,7 +47,7 @@ pub async fn login_user(
             }
         },
         Err(err) => match err {
-            LoginWrongCredentialsErr => respond_unauthorized(err),
+            AuthLoginFailed => respond_unauthorized(err),
             _ => respond_internal_server_error(err),
         },
     }

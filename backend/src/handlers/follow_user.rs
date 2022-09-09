@@ -21,11 +21,13 @@ pub async fn follow_user(
     match profile {
         Ok(profile) => (StatusCode::OK, Json(json!({ "profile": profile }))),
         Err(err) => match err {
-            AppError::IgnorableErr => get_user_profile(Path(username), Extension(state)).await,
+            AppError::Ignorable => get_user_profile(Path(username), Extension(state)).await,
             AppError::NothingFound => respond_not_found(err),
-            AppError::InvalidInput => respond_bad_request(err),
-            AppError::AuthUnauthorizedErr => respond_unauthorized(err),
-            AppError::InvalidTokenErr(msg) => respond_unauthorized(AppError::InvalidTokenErr(msg)),
+            AppError::AuthInvalidInput => respond_bad_request(err),
+            AppError::AuthUnauthorized => respond_unauthorized(err),
+            AppError::AuthInvalidTokenErr(msg) => {
+                respond_unauthorized(AppError::AuthInvalidTokenErr(msg))
+            }
             _ => respond_internal_server_error(err),
         },
     }

@@ -62,8 +62,8 @@ impl IntoResponse for AppError {
             "error": self.to_string()
         }));
         let status_code = match self {
-            AppError::AuthUnauthorizedErr => (StatusCode::UNAUTHORIZED, Json(Value::default())),
-            AppError::InvalidTokenErr(_) => (StatusCode::UNAUTHORIZED, body),
+            AppError::AuthUnauthorized => (StatusCode::UNAUTHORIZED, Json(Value::default())),
+            AppError::AuthInvalidTokenErr(_) => (StatusCode::UNAUTHORIZED, body),
             _ => (StatusCode::INTERNAL_SERVER_ERROR, body),
         };
         status_code.into_response()

@@ -22,19 +22,19 @@ pub type Result<T> = std::result::Result<T, AppError>;
 #[derive(Debug, Error)]
 pub enum AppError {
     #[error("email already exists")]
-    UserRepoSaveEmailAlreadyExistsErr,
+    RegistrationEmailAlreadyExists,
 
     #[error("wrong credentials")]
-    LoginWrongCredentialsErr,
+    AuthLoginFailed,
 
     #[error("unauthorized")]
-    AuthUnauthorizedErr,
-
-    #[error("invalid input")]
-    InvalidInput,
+    AuthUnauthorized,
 
     #[error("invalid token: {0}")]
-    InvalidTokenErr(String),
+    AuthInvalidTokenErr(String),
+
+    #[error("invalid input")]
+    AuthInvalidInput,
 
     #[error("entry not found")]
     NothingFound,
@@ -43,7 +43,7 @@ pub enum AppError {
     InternalErr,
 
     #[error("")]
-    IgnorableErr,
+    Ignorable,
 }
 
 impl From<(sqlx::Error, AppUseCase)> for AppError {
@@ -55,7 +55,7 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
             AppUseCase::UserRegister => match &err.into_database_error() {
                 Some(e) => match e.code() {
                     Some(code) => match code.as_ref() {
-                        "23505" => AppError::UserRepoSaveEmailAlreadyExistsErr,
+                        "23505" => AppError::RegistrationEmailAlreadyExists,
                         _ => AppError::InternalErr,
                     },
                     None => AppError::InternalErr,
@@ -64,7 +64,7 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
             },
 
             AppUseCase::UserLogin => match &err {
-                sqlx::Error::RowNotFound => AppError::LoginWrongCredentialsErr,
+                sqlx::Error::RowNotFound => AppError::AuthLoginFailed,
                 _ => AppError::InternalErr,
             },
 
@@ -76,7 +76,7 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
             AppUseCase::FollowUser => match &err.into_database_error() {
                 Some(dbe) => match dbe.code() {
                     Some(code) => match code.as_ref() {
-                        "23505" => AppError::IgnorableErr,
+                        "23505" => AppError::Ignorable,
                         _ => AppError::InternalErr,
                     },
                     None => AppError::InternalErr,
@@ -100,6 +100,6 @@ impl From<sqlx::Error> for AppError {
 impl From<jsonwebtoken::errors::Error> for AppError {
     fn from(err: jsonwebtoken::errors::Error) -> Self {
         log::debug!("From jwt err: {:?}", err);
-        AppError::InvalidTokenErr(err.to_string())
+        AppError::AuthInvalidTokenErr(err.to_string())
     }
 }

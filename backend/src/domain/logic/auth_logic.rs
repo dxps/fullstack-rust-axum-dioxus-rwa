@@ -46,7 +46,7 @@ impl AuthMgr {
                     }
                     false => {
                         log::debug!("Wrong login credentials for email {:?}", email);
-                        Err(AppError::LoginWrongCredentialsErr)
+                        Err(AppError::AuthLoginFailed)
                     }
                 }
             }

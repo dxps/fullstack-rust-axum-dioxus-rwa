@@ -29,8 +29,10 @@ pub async fn get_current_user(
             (StatusCode::OK, Json(serde_json::to_value(out).unwrap()))
         }
         Err(err) => match err {
-            AppError::AuthUnauthorizedErr => respond_unauthorized(err),
-            AppError::InvalidTokenErr(msg) => respond_unauthorized(AppError::InvalidTokenErr(msg)),
+            AppError::AuthUnauthorized => respond_unauthorized(err),
+            AppError::AuthInvalidTokenErr(msg) => {
+                respond_unauthorized(AppError::AuthInvalidTokenErr(msg))
+            }
             _ => respond_internal_server_error(err),
         },
     }

@@ -8,7 +8,7 @@ use crate::{
     domain::model::User,
     handlers::{respond_bad_request, respond_internal_server_error},
     token::create_jwt,
-    AppError::UserRepoSaveEmailAlreadyExistsErr,
+    AppError::RegistrationEmailAlreadyExists,
     AppState,
 };
 
@@ -61,7 +61,7 @@ pub async fn register_user(
             Err(_) => todo!(),
         },
         Err(err) => match err {
-            UserRepoSaveEmailAlreadyExistsErr => respond_bad_request(err),
+            RegistrationEmailAlreadyExists => respond_bad_request(err),
             _ => respond_internal_server_error(err),
         },
     }

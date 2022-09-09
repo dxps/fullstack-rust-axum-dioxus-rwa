@@ -136,7 +136,7 @@ impl UserRepo {
         image: Option<String>,
     ) -> Result<UserEntry, AppError> {
         if email.is_none() && bio.is_none() && image.is_none() {
-            return Err(AppError::InvalidInput);
+            return Err(AppError::AuthInvalidInput);
         }
         match self.get_by_id(&id, AppUseCase::UpdateUser).await {
             Ok(mut entry) => {
