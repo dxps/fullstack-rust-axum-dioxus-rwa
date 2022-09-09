@@ -10,10 +10,12 @@ pub struct Claims {
     pub sub: i64,
     pub exp: i64,
     pub iat: i64,
+    pub email: String,
+    pub username: String,
 }
 
 impl Claims {
-    pub fn new(id: i64) -> Self {
+    pub fn new(id: i64, email: String, username: String) -> Self {
         let iat = Utc::now();
         let exp = iat + Duration::minutes(5);
 
@@ -21,15 +23,17 @@ impl Claims {
             sub: id,
             iat: iat.timestamp(),
             exp: exp.timestamp(),
+            email,
+            username,
         }
     }
 }
 
 /// Create a signed JWT token.
-pub fn create_jwt(id: i64) -> Result<String> {
+pub fn create_jwt(id: i64, email: String, username: String) -> Result<String> {
     Ok(jsonwebtoken::encode(
         &Header::default(),
-        &Claims::new(id),
+        &Claims::new(id, email, username),
         &EncodingKey::from_secret("TODO_JWT_SECRET_AS_CONFIG".as_bytes()),
     )?)
 }

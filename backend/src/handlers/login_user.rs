@@ -28,7 +28,7 @@ pub async fn login_user(
         .login_user(input.user.email, input.user.password)
         .await
     {
-        Ok(user) => match create_jwt(user.id) {
+        Ok(user) => match create_jwt(user.id, user.email.clone(), user.username.clone()) {
             Ok(token) => {
                 let out = UserOutDTO {
                     user: UserOutDTOUserAttrs {
