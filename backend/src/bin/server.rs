@@ -15,7 +15,7 @@ use backend::{
     config::get_config,
     db::{init_db_pool, ping_db},
     handlers::{
-        follow_user, get_current_user, get_user_profile, login_user, register_user,
+        follow_user, get_current_user, get_user_profile, login_user, register_user, unfollow_user,
         update_current_user,
     },
     AppState,
@@ -67,7 +67,10 @@ async fn main() {
         .route("/api/users", post(register_user))
         .route("/api/user", get(get_current_user).put(update_current_user))
         .route("/api/profiles/:username", get(get_user_profile))
-        .route("/api/profiles/:username/follow", post(follow_user))
+        .route(
+            "/api/profiles/:username/follow",
+            post(follow_user).delete(unfollow_user),
+        )
         .layer(tracing_layer)
         .layer(Extension(app_state_layer))
         .merge(SpaRouter::new("/assets", opt.assets_dir))

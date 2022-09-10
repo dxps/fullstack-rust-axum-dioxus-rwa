@@ -91,6 +91,32 @@ impl UserRepo {
         }
     }
 
+    pub async fn unfollow_user(
+        &self,
+        user_id: &UserId,
+        username: &String,
+        followed_username: &String,
+    ) -> Result<UserProfileDTO, AppError> {
+        // First, get the followed user_id.
+        let followed_user_id =
+            sqlx::query_as::<_, UserId>("SELECT id FROM accounts WHERE username = $1")
+                .bind(followed_username)
+                .fetch_one(self.dbcp.as_ref())
+                .await?;
+        match sqlx::query("DELETE FROM followings WHERE user_id = $1 AND followed_user_id = $2")
+            .bind(user_id.as_value())
+            .bind(followed_user_id.as_value())
+            .execute(self.dbcp.as_ref())
+            .await
+        {
+            Ok(_) => {
+                self.get_profile_by_username(username, AppUseCase::FollowUser)
+                    .await
+            }
+            Err(err) => Err(AppError::from((err, AppUseCase::FollowUser))),
+        }
+    }
+
     pub async fn get_profile_by_username(
         &self,
         username: &String,

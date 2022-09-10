@@ -42,3 +42,34 @@ pub async fn follow_user(
         },
     }
 }
+
+pub async fn unfollow_user(
+    Path(username): Path<String>,
+    user_claims: Claims,
+    Extension(state): Extension<Arc<AppState>>,
+) -> (StatusCode, Json<Value>) {
+    let profile = state
+        .user_repo
+        .unfollow_user(
+            &UserId::from(user_claims.sub),
+            &user_claims.username,
+            &username,
+        )
+        .await;
+
+    match profile {
+        Ok(profile) => (StatusCode::OK, Json(json!({ "profile": profile }))),
+        Err(err) => match err {
+            AppError::Ignorable => {
+                get_user_profile(Path(user_claims.username), Extension(state)).await
+            }
+            AppError::NothingFound => respond_not_found(err),
+            AppError::AuthInvalidInput => respond_bad_request(err),
+            AppError::AuthUnauthorized => respond_unauthorized(err),
+            AppError::AuthInvalidTokenErr(msg) => {
+                respond_unauthorized(AppError::AuthInvalidTokenErr(msg))
+            }
+            _ => respond_internal_server_error(err),
+        },
+    }
+}
