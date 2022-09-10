@@ -28,7 +28,7 @@ pub async fn login_user(
         .login_user(input.user.email, input.user.password)
         .await
     {
-        Ok(user) => match create_jwt(user.id) {
+        Ok(user) => match create_jwt(user.id, user.email.clone(), user.username.clone()) {
             Ok(token) => {
                 respond_with_user_dto(user.email, Some(token), user.username, user.bio, user.image)
             }

@@ -45,7 +45,7 @@ pub async fn register_user(
     let pwd = input.user.password.clone();
     let user: User = input.into();
     match &state.auth_mgr.register_user(&user, pwd).await {
-        Ok(id) => match create_jwt(*id) {
+        Ok(id) => match create_jwt(*id, user.email.clone(), user.username.clone()) {
             Ok(token) => {
                 respond_with_user_dto(user.email, Some(token), user.username, "".to_string(), None)
             }

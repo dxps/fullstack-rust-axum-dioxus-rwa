@@ -68,6 +68,7 @@ impl UserRepo {
     pub async fn follow_user(
         &self,
         user_id: &UserId,
+        username: &String,
         followed_username: &String,
     ) -> Result<UserProfileDTO, AppError> {
         // First, get the followed user_id.
@@ -83,7 +84,7 @@ impl UserRepo {
             .await
         {
             Ok(_) => {
-                self.get_profile_by_username(followed_username, AppUseCase::FollowUser)
+                self.get_profile_by_username(username, AppUseCase::FollowUser)
                     .await
             }
             Err(err) => Err(AppError::from((err, AppUseCase::FollowUser))),
