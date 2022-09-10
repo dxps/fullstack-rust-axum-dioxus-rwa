@@ -3,6 +3,26 @@ use serde_json::{json, Value};
 
 use crate::AppError;
 
+use super::UserOutDTO;
+
+/// Utility (and reused) function for responding with `User` payload in different use cases.
+pub fn respond_with_user_dto(
+    email: String,
+    token: Option<String>,
+    username: String,
+    bio: String,
+    image: Option<String>,
+) -> (StatusCode, Json<Value>) {
+    let dto = UserOutDTO {
+        email,
+        token,
+        username,
+        bio,
+        image,
+    };
+    (StatusCode::OK, Json(json!({ "user": dto })))
+}
+
 /// Utility function for responding with `500 Internal Server Error` code and an error description.
 pub fn respond_internal_server_error<E>(err: E) -> (StatusCode, Json<Value>)
 where

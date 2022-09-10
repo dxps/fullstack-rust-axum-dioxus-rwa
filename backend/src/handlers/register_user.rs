@@ -12,7 +12,7 @@ use crate::{
     AppState,
 };
 
-use super::{UserOutDTO, UserOutDTOUserAttrs};
+use super::respond_with_user_dto;
 
 #[derive(Debug, Deserialize)]
 pub struct RegisterUserInput {
@@ -47,16 +47,7 @@ pub async fn register_user(
     match &state.auth_mgr.register_user(&user, pwd).await {
         Ok(id) => match create_jwt(*id) {
             Ok(token) => {
-                let out = UserOutDTO {
-                    user: UserOutDTOUserAttrs {
-                        email: user.email,
-                        token: Some(token),
-                        username: user.username,
-                        bio: "".to_string(),
-                        image: None,
-                    },
-                };
-                (StatusCode::OK, Json(serde_json::to_value(out).unwrap()))
+                respond_with_user_dto(user.email, Some(token), user.username, "".to_string(), None)
             }
             Err(_) => todo!(),
         },

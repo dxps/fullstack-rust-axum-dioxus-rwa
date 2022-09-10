@@ -6,7 +6,7 @@ use serde_json::Value;
 
 use crate::{token::create_jwt, AppError::AuthLoginFailed, AppState};
 
-use super::{respond_internal_server_error, respond_unauthorized, UserOutDTO, UserOutDTOUserAttrs};
+use super::{respond_internal_server_error, respond_unauthorized, respond_with_user_dto};
 
 #[derive(Debug, Deserialize)]
 pub struct LoginUserInput {
@@ -30,16 +30,7 @@ pub async fn login_user(
     {
         Ok(user) => match create_jwt(user.id) {
             Ok(token) => {
-                let out = UserOutDTO {
-                    user: UserOutDTOUserAttrs {
-                        email: user.email,
-                        token: Some(token),
-                        username: user.username,
-                        bio: user.bio,
-                        image: user.image,
-                    },
-                };
-                (StatusCode::OK, Json(serde_json::to_value(out).unwrap()))
+                respond_with_user_dto(user.email, Some(token), user.username, user.bio, user.image)
             }
             Err(err) => {
                 log::error!("Failed to create jwt: {err}");

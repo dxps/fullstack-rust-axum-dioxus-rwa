@@ -7,8 +7,7 @@ use serde_json::Value;
 use crate::{domain::model::UserId, AppError, AppState};
 
 use super::{
-    respond_bad_request, respond_internal_server_error, respond_unauthorized, UserOutDTO,
-    UserOutDTOUserAttrs,
+    respond_bad_request, respond_internal_server_error, respond_unauthorized, respond_with_user_dto,
 };
 
 #[derive(Debug, Deserialize)]
@@ -33,18 +32,13 @@ pub async fn update_current_user(
         .update_by_id(user_id, input.user.email, input.user.bio, input.user.image)
         .await
     {
-        Ok(entry) => {
-            let out = UserOutDTO {
-                user: UserOutDTOUserAttrs {
-                    email: entry.user.email,
-                    token: None,
-                    username: entry.user.username,
-                    bio: entry.user.bio,
-                    image: entry.user.image,
-                },
-            };
-            (StatusCode::OK, Json(serde_json::to_value(out).unwrap()))
-        }
+        Ok(entry) => respond_with_user_dto(
+            entry.user.email,
+            None,
+            entry.user.username,
+            entry.user.bio,
+            entry.user.image,
+        ),
         Err(err) => match err {
             AppError::AuthInvalidInput => respond_bad_request(err),
             AppError::AuthUnauthorized => respond_unauthorized(err),
