@@ -4,8 +4,7 @@ use sqlx::{postgres::PgRow, FromRow, Row};
 
 use crate::{
     db::DbConnPool,
-    domain::model::{User, UserEntry, UserId},
-    handlers::UserProfileDTO,
+    domain::model::{User, UserEntry, UserId, UserProfile},
     AppError, AppUseCase,
 };
 
@@ -70,7 +69,7 @@ impl UserRepo {
         user_id: &UserId,
         username: &String,
         followed_username: &String,
-    ) -> Result<UserProfileDTO, AppError> {
+    ) -> Result<UserProfile, AppError> {
         // First, get the followed user_id.
         let followed_user_id =
             sqlx::query_as::<_, UserId>("SELECT id FROM accounts WHERE username = $1")
@@ -96,7 +95,7 @@ impl UserRepo {
         user_id: &UserId,
         username: &String,
         followed_username: &String,
-    ) -> Result<UserProfileDTO, AppError> {
+    ) -> Result<UserProfile, AppError> {
         // First, get the followed user_id.
         let followed_user_id =
             sqlx::query_as::<_, UserId>("SELECT id FROM accounts WHERE username = $1")
@@ -121,13 +120,13 @@ impl UserRepo {
         &self,
         username: &String,
         usecase: AppUseCase,
-    ) -> Result<UserProfileDTO, AppError> {
+    ) -> Result<UserProfile, AppError> {
         let mut user_id = 0_i64;
         let res = sqlx::query("SELECT id, bio, image FROM accounts WHERE username = $1")
             .bind(username)
             .map(|row: PgRow| {
                 user_id = row.get("id");
-                UserProfileDTO {
+                UserProfile {
                     username: username.clone(),
                     bio: row.get("bio"),
                     image: row.get("image"),
