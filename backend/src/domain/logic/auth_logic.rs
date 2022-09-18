@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
-use crate::{domain::model::User, repo::UserRepo, AppError, AppUseCase};
+use crate::{domain::model::User, repos::UsersRepo, AppError, AppUseCase};
 
 pub struct AuthMgr {
-    user_repo: Arc<UserRepo>,
+    user_repo: Arc<UsersRepo>,
 }
 
 impl AuthMgr {
     /// Create a new instance of `AuthMgr`.
-    pub fn new(user_repo: Arc<UserRepo>) -> Self {
+    pub fn new(user_repo: Arc<UsersRepo>) -> Self {
         Self { user_repo }
     }
 

@@ -15,3 +15,28 @@ pub struct Article {
     pub favorites_count: i32,
     pub author: UserProfile,
 }
+
+impl Article {
+    pub fn new(
+        slug: String,
+        title: String,
+        description: String,
+        body: String,
+        created_at: DateTime<Utc>,
+        updated_at: DateTime<Utc>,
+        author: UserProfile,
+    ) -> Self {
+        Self {
+            slug,
+            title,
+            description,
+            body,
+            tag_list: vec![],
+            created_at,
+            updated_at,
+            favorited: false,
+            favorites_count: 0,
+            author,
+        }
+    }
+}

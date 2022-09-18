@@ -9,11 +9,11 @@ use crate::{
 };
 
 /// A Postgres specific implementation of `UserRepo`.
-pub struct UserRepo {
+pub struct UsersRepo {
     dbcp: Arc<DbConnPool>,
 }
 
-impl UserRepo {
+impl UsersRepo {
     pub fn new(dbcp: Arc<DbConnPool>) -> Self {
         Self { dbcp }
     }

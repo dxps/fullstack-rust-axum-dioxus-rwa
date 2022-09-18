@@ -8,5 +8,5 @@ pub mod config;
 pub mod db;
 pub mod domain;
 pub mod handlers;
-pub mod repo;
+pub mod repos;
 pub mod token;
