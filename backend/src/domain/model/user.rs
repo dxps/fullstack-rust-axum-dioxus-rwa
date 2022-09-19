@@ -47,5 +47,5 @@ pub struct UserProfile {
     pub username: String,
     pub bio: String,
     pub image: Option<String>,
-    pub following: Option<Vec<UserId>>,
+    pub following: bool,
 }

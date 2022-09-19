@@ -66,8 +66,7 @@ impl UsersRepo {
 
     pub async fn follow_user(
         &self,
-        user_id: &UserId,
-        username: &String,
+        curr_user_id: &UserId,
         followed_username: &String,
     ) -> Result<UserProfile, AppError> {
         // First, get the followed user_id.
@@ -77,14 +76,18 @@ impl UsersRepo {
                 .fetch_one(self.dbcp.as_ref())
                 .await?;
         match sqlx::query("INSERT INTO followings VALUES($1, $2)")
-            .bind(user_id.as_value())
+            .bind(curr_user_id.as_value())
             .bind(followed_user_id.as_value())
             .execute(self.dbcp.as_ref())
             .await
         {
             Ok(_) => {
-                self.get_profile_by_username(username, AppUseCase::FollowUser)
-                    .await
+                self.get_profile_by_username(
+                    curr_user_id,
+                    followed_username,
+                    AppUseCase::FollowUser,
+                )
+                .await
             }
             Err(err) => Err(AppError::from((err, AppUseCase::FollowUser))),
         }
@@ -92,8 +95,7 @@ impl UsersRepo {
 
     pub async fn unfollow_user(
         &self,
-        user_id: &UserId,
-        username: &String,
+        curr_user_id: &UserId,
         followed_username: &String,
     ) -> Result<UserProfile, AppError> {
         // First, get the followed user_id.
@@ -103,14 +105,18 @@ impl UsersRepo {
                 .fetch_one(self.dbcp.as_ref())
                 .await?;
         match sqlx::query("DELETE FROM followings WHERE user_id = $1 AND followed_user_id = $2")
-            .bind(user_id.as_value())
+            .bind(curr_user_id.as_value())
             .bind(followed_user_id.as_value())
             .execute(self.dbcp.as_ref())
             .await
         {
             Ok(_) => {
-                self.get_profile_by_username(username, AppUseCase::FollowUser)
-                    .await
+                self.get_profile_by_username(
+                    curr_user_id,
+                    followed_username,
+                    AppUseCase::FollowUser,
+                )
+                .await
             }
             Err(err) => Err(AppError::from((err, AppUseCase::FollowUser))),
         }
@@ -118,34 +124,37 @@ impl UsersRepo {
 
     pub async fn get_profile_by_username(
         &self,
+        curr_user_id: &UserId,
         username: &String,
         usecase: AppUseCase,
     ) -> Result<UserProfile, AppError> {
         let mut user_id = 0_i64;
-        let res = sqlx::query("SELECT id, bio, image FROM accounts WHERE username = $1")
-            .bind(username)
-            .map(|row: PgRow| {
-                user_id = row.get("id");
-                UserProfile {
-                    username: username.clone(),
-                    bio: row.get("bio"),
-                    image: row.get("image"),
-                    following: None,
-                }
-            })
-            .fetch_one(self.dbcp.as_ref())
-            .await;
-        match res {
-            Ok(mut dto) => {
-                let followings = self.get_followings(user_id).await;
-                dto.following = followings.ok();
-                Ok(dto)
+        let res = sqlx::query(
+            "SELECT id, bio, image, COUNT(f.user_id) AS following FROM accounts a
+                    LEFT OUTER JOIN followings f ON f.followed_user_id = a.id AND f.user_id = $2
+                    WHERE a.username = $1
+                    GROUP BY a.id",
+        )
+        .bind(username)
+        .bind(curr_user_id.as_value())
+        .map(|row: PgRow| {
+            user_id = row.get("id");
+            UserProfile {
+                username: username.clone(),
+                bio: row.get("bio"),
+                image: row.get("image"),
+                following: row.get::<i64, _>("following") == 1,
             }
+        })
+        .fetch_one(self.dbcp.as_ref())
+        .await;
+        match res {
+            Ok(result) => Ok(result),
             Err(err) => Err(AppError::from((err, usecase))),
         }
     }
 
-    async fn get_followings(&self, user_id: i64) -> Result<Vec<UserId>, AppError> {
+    async fn _get_followings(&self, user_id: i64) -> Result<Vec<UserId>, AppError> {
         let result = sqlx::query("SELECT followed_user_id FROM followings WHERE user_id = $1")
             .bind(user_id)
             .map(|row: PgRow| UserId::from(row.get::<i64, _>("followed_user_id")))

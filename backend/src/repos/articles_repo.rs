@@ -4,7 +4,7 @@ use sqlx::{postgres::PgRow, Row};
 
 use crate::{
     db::DbConnPool,
-    domain::model::{Article, User, UserProfile},
+    domain::model::{Article, UserProfile},
     AppError,
 };
 
@@ -30,11 +30,8 @@ impl ArticlesRepo {
             group by a.id, u.username, u.bio, u.image;",
         )
         .map(|r: PgRow| {
-            // ...
-            let following = match r.try_get("following") {
-                Ok(_) => todo!(),
-                Err(_) => todo!(),
-            }
+            let following = r.get("following");
+
             let author: UserProfile = UserProfile {
                 username: r.get("username"),
                 bio: r.get("bio"),
@@ -55,7 +52,7 @@ impl ArticlesRepo {
         .await;
         match res {
             Ok(entry) => Ok(entry),
-            Err(err) => Err(AppError::from((err, usecase))),
+            Err(err) => Err(AppError::from(err)),
         }
     }
 }

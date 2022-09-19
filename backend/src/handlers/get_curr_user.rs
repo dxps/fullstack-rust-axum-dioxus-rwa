@@ -8,12 +8,12 @@ use crate::{domain::model::UserId, AppError, AppState, AppUseCase};
 use super::{respond_internal_server_error, respond_unauthorized, respond_with_user_dto};
 
 pub async fn get_current_user(
-    user_id: UserId,
+    curr_user_id: UserId,
     Extension(state): Extension<Arc<AppState>>,
 ) -> (StatusCode, Json<Value>) {
     match state
         .user_repo
-        .get_by_id(&user_id, AppUseCase::AnyTokenProtectedOperation)
+        .get_by_id(&curr_user_id, AppUseCase::AnyTokenProtectedOperation)
         .await
     {
         Ok(entry) => respond_with_user_dto(
