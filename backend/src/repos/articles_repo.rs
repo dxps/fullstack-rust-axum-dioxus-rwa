@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use log::warn;
 use sqlx::{postgres::PgRow, Row};
 
 use crate::{
@@ -54,5 +55,43 @@ impl ArticlesRepo {
             Ok(entry) => Ok(entry),
             Err(err) => Err(AppError::from(err)),
         }
+    }
+
+    pub async fn add(
+        &self,
+        title: String,
+        description: String,
+        body: String,
+        tag_list: Vec<String>,
+        author_id: i64,
+    ) -> Result<(), AppError> {
+        // ...
+        let slug = "";
+
+        let mut txn = self.dbcp.begin().await?;
+
+        if let Err(err) = sqlx::query(
+            "INSERT INTO articles(slug, title, description, body, author_id) 
+            VALUES ($1, $2, $3, $4, $5)",
+        )
+        .bind(slug)
+        .bind(title)
+        .bind(description)
+        .bind(body)
+        .bind(author_id)
+        .execute(&mut txn)
+        .await
+        {
+            if let Err(e) = txn.rollback().await {
+                warn!("Txn rollback on ArticlesRepo::add failed: {}", e)
+            };
+            return Err(AppError::from(err));
+        }
+
+        // TODO: Include the tags in both persistence and this implementation.
+
+        txn.commit().await?;
+
+        Ok(())
     }
 }
