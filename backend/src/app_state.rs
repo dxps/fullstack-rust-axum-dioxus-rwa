@@ -1,12 +1,17 @@
 use std::sync::Arc;
 
-use crate::{db::DbConnPool, domain::logic::AuthMgr, repos::UsersRepo};
+use crate::{
+    db::DbConnPool,
+    domain::logic::{ArticlesMgr, AuthMgr},
+    repos::{ArticlesRepo, UsersRepo},
+};
 
 /// The (global) state of the app.
 pub struct AppState {
     pub dbcp: Arc<DbConnPool>,
     pub user_repo: Arc<UsersRepo>,
     pub auth_mgr: AuthMgr,
+    pub articles_mgr: ArticlesMgr,
 }
 
 impl AppState {
@@ -14,10 +19,13 @@ impl AppState {
         let dbcp = Arc::new(dbcp);
         let user_repo = Arc::new(UsersRepo::new(dbcp.clone()));
         let auth_mgr = AuthMgr::new(user_repo.clone());
+        let articles_repo = ArticlesRepo::new(dbcp.clone());
+        let articles_mgr = ArticlesMgr::new(articles_repo);
         Self {
             dbcp,
             user_repo,
             auth_mgr,
+            articles_mgr,
         }
     }
 }

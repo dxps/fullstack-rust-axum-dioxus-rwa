@@ -18,7 +18,7 @@ impl ArticlesRepo {
         Self { dbcp }
     }
 
-    pub async fn list(&self) -> Result<Vec<Article>, AppError> {
+    pub async fn get_articles(&self) -> Result<Vec<Article>, AppError> {
         let res = sqlx::query(
             "select count(fa.user_id) as favorites_count,
                     a.id, a.slug, a.title, a.description, a.body, a.created_at, a.updated_at,
