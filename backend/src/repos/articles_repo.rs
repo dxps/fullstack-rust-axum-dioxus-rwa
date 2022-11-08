@@ -64,34 +64,59 @@ impl ArticlesRepo {
         body: String,
         tag_list: Vec<String>,
         author_id: i64,
-    ) -> Result<(), AppError> {
-        // ...
-        let slug = "";
-
+    ) -> Result<i64, AppError> {
+        //
         let mut txn = self.dbcp.begin().await?;
+        let slug = "";
+        let article_id: i64;
 
-        if let Err(err) = sqlx::query(
+        match sqlx::query(
             "INSERT INTO articles(slug, title, description, body, author_id) 
-            VALUES ($1, $2, $3, $4, $5)",
+            VALUES ($1, $2, $3, $4, $5) RETURNING id",
         )
         .bind(slug)
         .bind(title)
         .bind(description)
         .bind(body)
         .bind(author_id)
-        .execute(&mut txn)
+        .fetch_one(&mut txn)
         .await
         {
-            if let Err(e) = txn.rollback().await {
-                warn!("Txn rollback on ArticlesRepo::add failed: {}", e)
-            };
-            return Err(AppError::from(err));
+            Ok(row) => article_id = row.get::<i64, _>("id"),
+            Err(err) => {
+                if let Err(e) = txn.rollback().await {
+                    warn!(
+                        "Txn rollback of 1st insert on ArticlesRepo::add failed: {}",
+                        e
+                    )
+                };
+                return Err(AppError::from(err));
+            }
         }
 
-        // TODO: Include the tags in both persistence and this implementation.
+        for tag in tag_list {
+            if let Err(err) =
+                sqlx::query("INSERT INTO tags_articles(tag,article_id) VALUES ($1, $2)")
+                    .bind(tag)
+                    .bind(article_id)
+                    .execute(&mut txn)
+                    .await
+            {
+                match txn.rollback().await {
+                    Ok(()) => (),
+                    Err(e) => {
+                        warn!(
+                            "Txn rollback of 1st insert on ArticlesRepo::add failed: {}",
+                            e
+                        )
+                    }
+                }
+                return Err(AppError::from(err));
+            }
+        }
 
         txn.commit().await?;
 
-        Ok(())
+        Ok(article_id)
     }
 }
