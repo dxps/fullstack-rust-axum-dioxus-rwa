@@ -133,7 +133,7 @@ impl UsersRepo {
             "SELECT id, bio, image, COUNT(f.user_id) AS following FROM accounts a
                     LEFT OUTER JOIN followings f ON f.followed_user_id = a.id AND f.user_id = $2
                     WHERE a.username = $1
-                    GROUP BY a.id, a.bio, a.image",
+                    GROUP BY a.id",
         )
         .bind(username)
         .bind(curr_user_id.as_value())
@@ -159,7 +159,7 @@ impl UsersRepo {
             "SELECT username, bio, image, COUNT(f.user_id) AS following FROM accounts a
                     LEFT OUTER JOIN followings f ON f.followed_user_id = a.id AND f.user_id = $1
                     WHERE a.id = $1
-                    GROUP BY a.username",
+                    GROUP BY a.username, a.bio, a.image",
         )
         .bind(user_id)
         .map(|row: PgRow| UserProfile {
