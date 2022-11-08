@@ -5,7 +5,6 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 
 use crate::{
-    domain::model::Article,
     handlers::{respond_internal_server_error, respond_unauthorized},
     token::Claims,
     AppError, AppState,
@@ -42,16 +41,12 @@ pub async fn create_article(
         )
         .await
     {
-        Ok(_) => {
-            // let article = Article::new(...)
-            // (
-            //     StatusCode::OK,
-            //     Json(json!({
-            //         "article": article,
-            //     })),
-            // )
-            todo!()
-        }
+        Ok(article) => (
+            StatusCode::OK,
+            Json(json!({
+                "article": article,
+            })),
+        ),
         Err(err) => match err {
             AppError::AuthUnauthorized => respond_unauthorized(err),
             _ => respond_internal_server_error(err),

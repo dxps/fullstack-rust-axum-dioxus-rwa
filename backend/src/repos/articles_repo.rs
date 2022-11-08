@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use chrono::{DateTime, Utc};
 use log::warn;
 use sqlx::{postgres::PgRow, Row};
 
@@ -59,20 +60,21 @@ impl ArticlesRepo {
 
     pub async fn add(
         &self,
-        title: String,
-        description: String,
-        body: String,
-        tag_list: Vec<String>,
+        slug: &String,
+        title: &String,
+        description: &String,
+        body: &String,
+        tag_list: &Vec<String>,
         author_id: i64,
-    ) -> Result<i64, AppError> {
+    ) -> Result<DateTime<Utc>, AppError> {
         //
         let mut txn = self.dbcp.begin().await?;
-        let slug = "";
         let article_id: i64;
+        let created_at: DateTime<Utc>;
 
         match sqlx::query(
             "INSERT INTO articles(slug, title, description, body, author_id) 
-            VALUES ($1, $2, $3, $4, $5) RETURNING id",
+            VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at",
         )
         .bind(slug)
         .bind(title)
@@ -82,7 +84,10 @@ impl ArticlesRepo {
         .fetch_one(&mut txn)
         .await
         {
-            Ok(row) => article_id = row.get::<i64, _>("id"),
+            Ok(row) => {
+                article_id = row.get("id");
+                created_at = row.get("created_at");
+            }
             Err(err) => {
                 if let Err(e) = txn.rollback().await {
                     warn!(
@@ -106,7 +111,7 @@ impl ArticlesRepo {
                     Ok(()) => (),
                     Err(e) => {
                         warn!(
-                            "Txn rollback of 1st insert on ArticlesRepo::add failed: {}",
+                            "Txn rollback of 2nd insert on ArticlesRepo::add failed: {}",
                             e
                         )
                     }
@@ -117,6 +122,6 @@ impl ArticlesRepo {
 
         txn.commit().await?;
 
-        Ok(article_id)
+        Ok(created_at)
     }
 }

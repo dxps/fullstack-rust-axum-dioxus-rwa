@@ -133,7 +133,7 @@ impl UsersRepo {
             "SELECT id, bio, image, COUNT(f.user_id) AS following FROM accounts a
                     LEFT OUTER JOIN followings f ON f.followed_user_id = a.id AND f.user_id = $2
                     WHERE a.username = $1
-                    GROUP BY a.id",
+                    GROUP BY a.id, a.bio, a.image",
         )
         .bind(username)
         .bind(curr_user_id.as_value())
@@ -151,6 +151,28 @@ impl UsersRepo {
         match res {
             Ok(result) => Ok(result),
             Err(err) => Err(AppError::from((err, usecase))),
+        }
+    }
+
+    pub async fn get_profile_by_id(&self, user_id: i64) -> Result<UserProfile, AppError> {
+        let res = sqlx::query(
+            "SELECT username, bio, image, COUNT(f.user_id) AS following FROM accounts a
+                    LEFT OUTER JOIN followings f ON f.followed_user_id = a.id AND f.user_id = $1
+                    WHERE a.id = $1
+                    GROUP BY a.username",
+        )
+        .bind(user_id)
+        .map(|row: PgRow| UserProfile {
+            username: row.get("username"),
+            bio: row.get("bio"),
+            image: row.get("image"),
+            following: row.get::<i64, _>("following") == 1,
+        })
+        .fetch_one(self.dbcp.as_ref())
+        .await;
+        match res {
+            Ok(result) => Ok(result),
+            Err(err) => Err(AppError::from(err)),
         }
     }
 
