@@ -27,17 +27,17 @@ impl ArticlesRepo {
                     u.username, u.bio, u.image, count(f.user_id) as following 
             from articles a
             join accounts u on a.author_id = u.id 
-            join followings f on u.id = f.user_id 
-            join favorited_articles fa on a.id = fa.article_id
+            left outer join followings f on u.id = f.user_id 
+            left outer join favorited_articles fa on a.id = fa.article_id
             group by a.id, u.username, u.bio, u.image;",
         )
         .map(|r: PgRow| {
-            let following = r.get("following");
+            let following = r.get::<i64, _>("following") > 0;
 
             let author: UserProfile = UserProfile {
                 username: r.get("username"),
                 bio: r.get("bio"),
-                image: Some(r.get("image")),
+                image: r.try_get("image").unwrap_or_default(),
                 following,
             };
             Article::new(
