@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{extract::Path, http::StatusCode, Extension, Json};
+use axum::{extract::{Path, State}, http::StatusCode, Json};
 use serde_json::{json, Value};
 
 use crate::{domain::model::UserId, handlers::respond_not_found, AppError, AppState, AppUseCase};
@@ -8,9 +8,9 @@ use crate::{domain::model::UserId, handlers::respond_not_found, AppError, AppSta
 use super::{respond_bad_request, respond_internal_server_error, respond_unauthorized};
 
 pub async fn get_user_profile(
+    State(state): State<Arc<AppState>>,
     curr_user_id: UserId,
     Path(username): Path<String>,
-    Extension(state): Extension<Arc<AppState>>,
 ) -> (StatusCode, Json<Value>) {
     let profile = state
         .user_repo

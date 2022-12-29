@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{http::StatusCode, Extension, Json};
+use axum::{http::StatusCode, Json, extract::State};
 use serde::Deserialize;
 use serde_json::{json, Value};
 
@@ -25,9 +25,9 @@ pub struct CreateArticleInputArticleKey {
 }
 
 pub async fn create_article(
-    Json(input): Json<CreateArticleInput>,
+    State(state): State<Arc<AppState>>,
     user_claims: Claims,
-    Extension(state): Extension<Arc<AppState>>,
+    Json(input): Json<CreateArticleInput>,
 ) -> (StatusCode, Json<Value>) {
     //
     match state

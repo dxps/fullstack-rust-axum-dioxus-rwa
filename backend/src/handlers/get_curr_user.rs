@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{http::StatusCode, Extension, Json};
+use axum::{http::StatusCode, Json, extract::State};
 use serde_json::Value;
 
 use crate::{domain::model::UserId, AppError, AppState, AppUseCase};
@@ -8,8 +8,8 @@ use crate::{domain::model::UserId, AppError, AppState, AppUseCase};
 use super::{respond_internal_server_error, respond_unauthorized, respond_with_user_dto};
 
 pub async fn get_current_user(
+    State(state): State<Arc<AppState>>,
     curr_user_id: UserId,
-    Extension(state): Extension<Arc<AppState>>,
 ) -> (StatusCode, Json<Value>) {
     match state
         .user_repo

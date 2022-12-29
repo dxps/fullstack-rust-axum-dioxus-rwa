@@ -11,6 +11,7 @@ use crate::{
 };
 
 /// A Postgres specific implementation of `UserRepo`.
+#[derive(Clone)]
 pub struct ArticlesRepo {
     dbcp: Arc<DbConnPool>,
 }

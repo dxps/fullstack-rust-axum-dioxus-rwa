@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::{domain::model::User, repos::UsersRepo, AppError, AppUseCase};
 
+#[derive(Clone)]
 pub struct AuthMgr {
     user_repo: Arc<UsersRepo>,
 }

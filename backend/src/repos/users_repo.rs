@@ -224,7 +224,7 @@ impl UsersRepo {
 }
 
 // ---------------------------------------
-//    From<sqlx::Error> implementations
+//    sqlx::FromRow implementations
 // ---------------------------------------
 
 impl FromRow<'_, PgRow> for User {

@@ -8,6 +8,7 @@ use crate::{
     AppError,
 };
 
+#[derive(Clone)]
 pub struct ArticlesMgr {
     articles_repo: ArticlesRepo,
     user_repo: Arc<UsersRepo>,

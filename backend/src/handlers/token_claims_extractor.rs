@@ -1,7 +1,7 @@
 use axum::{
     async_trait,
-    extract::{FromRequest, TypedHeader},
-    headers::Authorization,
+    extract::{TypedHeader, FromRequestParts},
+    headers::Authorization, http::{request::Parts},
 };
 
 use crate::{
@@ -11,17 +11,17 @@ use crate::{
 };
 
 #[async_trait]
-impl<B> FromRequest<B> for UserId
+impl<S> FromRequestParts<S> for UserId
 where
-    B: Send,
+    S: Send + Sync,
 {
     type Rejection = AppError;
 
-    async fn from_request(
-        req: &mut axum::extract::RequestParts<B>,
+    async fn from_request_parts(
+        parts: &mut Parts, state: &S
     ) -> Result<Self, Self::Rejection> {
         // Extract the token from the Authorization (HTTP request) header having the value of "Bearer <token>".
-        let token = TypedHeader::<Authorization<Token>>::from_request(req)
+        let token = TypedHeader::<Authorization<Token>>::from_request_parts(parts, state)
             .await
             .map_err(|err| {
                 log::debug!("Failed to extract the token: {}", err);
@@ -42,17 +42,17 @@ where
 }
 
 #[async_trait]
-impl<B> FromRequest<B> for Claims
+impl<S> FromRequestParts<S> for Claims
 where
-    B: Send,
+S: Send + Sync,
 {
     type Rejection = AppError;
 
-    async fn from_request(
-        req: &mut axum::extract::RequestParts<B>,
+    async fn from_request_parts(
+        parts: &mut Parts, state: &S
     ) -> Result<Self, Self::Rejection> {
         // TODO: Make this token extraction a reusable fn for both this and previous extractor.
-        let token = TypedHeader::<Authorization<Token>>::from_request(req)
+        let token = TypedHeader::<Authorization<Token>>::from_request_parts(parts, state)
             .await
             .map_err(|err| {
                 log::debug!("Failed to extract the token: {}", err);

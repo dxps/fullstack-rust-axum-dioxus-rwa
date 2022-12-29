@@ -7,8 +7,7 @@ use std::{
 
 use axum::{
     response::IntoResponse,
-    routing::{get, post},
-    Extension, Json, Router,
+    routing::{get, post}, Json, Router, extract::State,
 };
 use axum_extra::routing::SpaRouter;
 use backend::{
@@ -58,25 +57,10 @@ async fn main() {
         }
     }
 
-    let tracing_layer = TraceLayer::new_for_http();
-    let app_state_layer = Arc::new(AppState::new(db_conn_pool));
+    let state = AppState::new(db_conn_pool);
 
-    let http_svc = Router::new()
-        .route("/api/healthcheck", get(health_check))
-        .route("/api/users/login", post(login_user))
-        .route("/api/users", post(register_user))
-        .route("/api/user", get(get_current_user).put(update_current_user))
-        .route("/api/profiles/:username", get(get_user_profile))
-        .route(
-            "/api/profiles/:username/follow",
-            post(follow_user).delete(unfollow_user),
-        )
-        .route("/api/articles", get(get_articles).post(create_article))
-        .layer(tracing_layer)
-        .layer(Extension(app_state_layer))
-        .merge(SpaRouter::new("/assets", opt.assets_dir))
-        .into_make_service();
-
+    let routes = routes(state, opt.assets_dir);
+ 
     let sock_addr = SocketAddr::from((
         IpAddr::from_str(opt.addr.as_str()).unwrap_or(IpAddr::V6(Ipv6Addr::LOCALHOST)),
         opt.port,
@@ -84,12 +68,31 @@ async fn main() {
     log::info!("Listening on http://{}", sock_addr);
 
     axum::Server::bind(&sock_addr)
-        .serve(http_svc)
+        .serve(routes.into_make_service())
         .await
         .expect("Unable to start server");
 }
 
-async fn health_check(Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
+fn routes(state: AppState, assets_dir: String) -> Router {
+    let tracing_layer = TraceLayer::new_for_http();
+    
+    Router::new()
+    .route("/api/healthcheck", get(health_check))
+    .route("/api/users/login", post(login_user))
+    .route("/api/users", post(register_user))
+    .route("/api/user", get(get_current_user).put(update_current_user))
+    .route("/api/profiles/:username", get(get_user_profile))
+    .route(
+        "/api/profiles/:username/follow",
+        post(follow_user).delete(unfollow_user),
+    )
+    .route("/api/articles", get(get_articles).post(create_article))
+    .layer(tracing_layer)
+    .with_state(Arc::new(state))
+    .merge(SpaRouter::new("/assets", assets_dir))
+}
+
+async fn health_check(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     match ping_db(&state.dbcp).await {
         true => Json(json!({ "database": "ok" })),
         false => Json(json!({ "database": "err" })),

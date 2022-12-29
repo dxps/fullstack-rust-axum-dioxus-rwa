@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{http::StatusCode, Extension, Json};
+use axum::{http::StatusCode, Json, extract::State};
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -19,9 +19,10 @@ pub struct LoginUserInputUserKey {
     pub password: String,
 }
 
+#[axum_macros::debug_handler]
 pub async fn login_user(
+    State(state): State<Arc<AppState>>,
     Json(input): Json<LoginUserInput>,
-    Extension(state): Extension<Arc<AppState>>,
 ) -> (StatusCode, Json<Value>) {
     match state
         .auth_mgr

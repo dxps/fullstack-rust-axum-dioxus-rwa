@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{http::StatusCode, Extension, Json};
+use axum::{http::StatusCode, Json, extract::State};
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -39,8 +39,8 @@ pub struct RegisterUserInputUserKey {
 }
 
 pub async fn register_user(
+    State(state): State<Arc<AppState>>,
     Json(input): Json<RegisterUserInput>,
-    Extension(state): Extension<Arc<AppState>>,
 ) -> (StatusCode, Json<Value>) {
     let pwd = input.user.password.clone();
     let user: User = input.into();

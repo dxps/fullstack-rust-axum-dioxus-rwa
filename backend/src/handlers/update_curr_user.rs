@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{http::StatusCode, Extension, Json};
+use axum::{http::StatusCode, Json, extract::State};
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -23,9 +23,9 @@ pub struct UpdateUserInputDTOUserAttrs {
 }
 
 pub async fn update_current_user(
+    State(state): State<Arc<AppState>>,
     user_id: UserId,
     Json(input): Json<UpdateUserInputDTO>,
-    Extension(state): Extension<Arc<AppState>>,
 ) -> (StatusCode, Json<Value>) {
     match state
         .user_repo

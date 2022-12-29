@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use axum::extract::FromRef;
+
 use crate::{
     db::DbConnPool,
     domain::logic::{ArticlesMgr, AuthMgr},
@@ -7,6 +9,7 @@ use crate::{
 };
 
 /// The (global) state of the app.
+#[derive(FromRef)]
 pub struct AppState {
     pub dbcp: Arc<DbConnPool>,
     pub user_repo: Arc<UsersRepo>,
