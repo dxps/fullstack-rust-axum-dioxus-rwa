@@ -6,8 +6,10 @@ use std::{
 };
 
 use axum::{
+    extract::State,
     response::IntoResponse,
-    routing::{get, post}, Json, Router, extract::State,
+    routing::{get, post},
+    Json, Router,
 };
 use axum_extra::routing::SpaRouter;
 use backend::{
@@ -60,7 +62,7 @@ async fn main() {
     let state = AppState::new(db_conn_pool);
 
     let routes = routes(state, opt.assets_dir);
- 
+
     let sock_addr = SocketAddr::from((
         IpAddr::from_str(opt.addr.as_str()).unwrap_or(IpAddr::V6(Ipv6Addr::LOCALHOST)),
         opt.port,
@@ -75,21 +77,21 @@ async fn main() {
 
 fn routes(state: AppState, assets_dir: String) -> Router {
     let tracing_layer = TraceLayer::new_for_http();
-    
+
     Router::new()
-    .route("/api/healthcheck", get(health_check))
-    .route("/api/users/login", post(login_user))
-    .route("/api/users", post(register_user))
-    .route("/api/user", get(get_current_user).put(update_current_user))
-    .route("/api/profiles/:username", get(get_user_profile))
-    .route(
-        "/api/profiles/:username/follow",
-        post(follow_user).delete(unfollow_user),
-    )
-    .route("/api/articles", get(get_articles).post(create_article))
-    .layer(tracing_layer)
-    .with_state(Arc::new(state))
-    .merge(SpaRouter::new("/assets", assets_dir))
+        .route("/api/healthcheck", get(health_check))
+        .route("/api/users/login", post(login_user))
+        .route("/api/users", post(register_user))
+        .route("/api/user", get(get_current_user).put(update_current_user))
+        .route("/api/profiles/:username", get(get_user_profile))
+        .route(
+            "/api/profiles/:username/follow",
+            post(follow_user).delete(unfollow_user),
+        )
+        .route("/api/articles", get(get_articles).post(create_article))
+        .layer(tracing_layer)
+        .with_state(Arc::new(state))
+        .merge(SpaRouter::new("/assets", assets_dir))
 }
 
 async fn health_check(State(state): State<Arc<AppState>>) -> impl IntoResponse {

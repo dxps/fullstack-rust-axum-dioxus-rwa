@@ -35,7 +35,7 @@ pub fn HomePage(cx: Scope) -> Element {
                                 }
                             }
                         }
-                        
+
                         div {
                             class: "article-preview",
                             div {
@@ -84,7 +84,7 @@ pub fn HomePage(cx: Scope) -> Element {
                             }
                         }
                     }
-                    
+
                     div {
                         class: "col-md-3",
                         div {

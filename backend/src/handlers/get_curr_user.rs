@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{http::StatusCode, Json, extract::State};
+use axum::{extract::State, http::StatusCode, Json};
 use serde_json::Value;
 
 use crate::{domain::model::UserId, AppError, AppState, AppUseCase};
