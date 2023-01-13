@@ -9,8 +9,8 @@ pub use dtos::*;
 mod responses;
 pub use responses::*;
 
-mod token_claims_extractor;
-pub use token_claims_extractor::*;
+mod extractors;
+pub use extractors::*;
 
 mod register_user;
 pub use register_user::*;
