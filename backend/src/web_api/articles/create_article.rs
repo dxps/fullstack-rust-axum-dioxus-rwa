@@ -1,6 +1,6 @@
 use crate::{
     token::Claims,
-    web_api::{respond_internal_server_error, respond_unauthorized, InputJson},
+    web_api::{extractors::InputJson, respond_internal_server_error, respond_unauthorized},
     AppError, AppState,
 };
 use axum::{extract::State, http::StatusCode, Json};

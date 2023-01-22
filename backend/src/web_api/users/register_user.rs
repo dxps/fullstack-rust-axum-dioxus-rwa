@@ -2,7 +2,7 @@ use super::responses::respond_with_user_dto;
 use crate::{
     domain::model::User,
     token::create_jwt,
-    web_api::{respond_bad_request, respond_internal_server_error, InputJson},
+    web_api::{extractors::InputJson, respond_bad_request, respond_internal_server_error},
     AppError::RegistrationEmailAlreadyExists,
     AppState,
 };

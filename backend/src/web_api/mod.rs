@@ -1,18 +1,15 @@
 //
 // Registering the modules in the module tree and
-// re-exporting their entries with a shorter path.
+// re-exporting their entries with a shorter path, where relevant.
 //
 
 mod responses;
 pub use responses::*;
 
-mod extractors;
-pub use extractors::*;
+pub mod extractors;
 
 mod users;
 pub use users::*;
-
-// Articles mgmt
 
 mod articles;
 pub use articles::*;

@@ -2,7 +2,8 @@ use super::responses::respond_with_user_dto;
 use crate::{
     domain::model::UserId,
     web_api::{
-        respond_bad_request, respond_internal_server_error, respond_unauthorized, InputJson,
+        extractors::InputJson, respond_bad_request, respond_internal_server_error,
+        respond_unauthorized,
     },
     AppError, AppState,
 };

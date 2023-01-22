@@ -1,7 +1,7 @@
 use super::responses::respond_with_user_dto;
 use crate::{
     token::create_jwt,
-    web_api::{respond_internal_server_error, respond_unauthorized, InputJson},
+    web_api::{extractors::InputJson, respond_internal_server_error, respond_unauthorized},
     AppError::AuthLoginFailed,
     AppState,
 };
