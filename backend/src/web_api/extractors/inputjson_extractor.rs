@@ -30,7 +30,6 @@ where
 
     async fn from_request(req: Request<B>, state: &S) -> Result<Self, Self::Rejection> {
         let (mut parts, body) = req.into_parts();
-        log::debug!("[FromRequest for Json]");
 
         // We can use other extractors to provide better rejection messages.
         // For example, here we are using `axum::extract::MatchedPath` to
