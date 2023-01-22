@@ -22,7 +22,10 @@ use std::{
     str::FromStr,
     sync::Arc,
 };
-use tower_http::trace::TraceLayer;
+use tower_http::{
+    cors::{Any, CorsLayer},
+    trace::TraceLayer,
+};
 
 #[tokio::main]
 async fn main() {
@@ -76,6 +79,7 @@ async fn main() {
 
 fn routes(state: AppState, assets_dir: String) -> Router {
     let tracing_layer = TraceLayer::new_for_http();
+    let cors_layer = CorsLayer::new().allow_origin(Any);
 
     Router::new()
         .route("/api/healthcheck", get(health_check))
@@ -89,6 +93,7 @@ fn routes(state: AppState, assets_dir: String) -> Router {
         )
         .route("/api/articles", get(get_articles).post(create_article))
         .layer(tracing_layer)
+        .layer(cors_layer)
         .with_state(Arc::new(state))
         .merge(SpaRouter::new("/assets", assets_dir))
 }
