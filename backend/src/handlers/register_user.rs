@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{extract::State, http::StatusCode};
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -12,7 +12,7 @@ use crate::{
     AppState,
 };
 
-use super::respond_with_user_dto;
+use super::{respond_with_user_dto, InputJson};
 
 #[derive(Debug, Deserialize)]
 pub struct RegisterUserInput {
@@ -40,8 +40,8 @@ pub struct RegisterUserInputUserKey {
 
 pub async fn register_user(
     State(state): State<Arc<AppState>>,
-    Json(input): Json<RegisterUserInput>,
-) -> (StatusCode, Json<Value>) {
+    InputJson(input): InputJson<RegisterUserInput>,
+) -> (StatusCode, axum::Json<Value>) {
     let pwd = input.user.password.clone();
     let user: User = input.into();
     match &state.auth_mgr.register_user(&user, pwd).await {

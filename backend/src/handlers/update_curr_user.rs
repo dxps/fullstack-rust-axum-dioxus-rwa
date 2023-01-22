@@ -7,7 +7,8 @@ use serde_json::Value;
 use crate::{domain::model::UserId, AppError, AppState};
 
 use super::{
-    respond_bad_request, respond_internal_server_error, respond_unauthorized, respond_with_user_dto,
+    respond_bad_request, respond_internal_server_error, respond_unauthorized,
+    respond_with_user_dto, InputJson,
 };
 
 #[derive(Debug, Deserialize)]
@@ -25,7 +26,7 @@ pub struct UpdateUserInputDTOUserAttrs {
 pub async fn update_current_user(
     State(state): State<Arc<AppState>>,
     user_id: UserId,
-    Json(input): Json<UpdateUserInputDTO>,
+    InputJson(input): InputJson<UpdateUserInputDTO>,
 ) -> (StatusCode, Json<Value>) {
     match state
         .user_repo

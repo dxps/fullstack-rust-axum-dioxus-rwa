@@ -5,7 +5,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 
 use crate::{
-    handlers::{respond_internal_server_error, respond_unauthorized},
+    handlers::{respond_internal_server_error, respond_unauthorized, InputJson},
     token::Claims,
     AppError, AppState,
 };
@@ -27,7 +27,7 @@ pub struct CreateArticleInputArticleKey {
 pub async fn create_article(
     State(state): State<Arc<AppState>>,
     user_claims: Claims,
-    Json(input): Json<CreateArticleInput>,
+    InputJson(input): InputJson<CreateArticleInput>,
 ) -> (StatusCode, Json<Value>) {
     //
     match state

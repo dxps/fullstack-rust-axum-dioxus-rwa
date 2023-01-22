@@ -3,9 +3,6 @@
 // re-exporting their entries with a shorter path.
 //
 
-mod api_err;
-pub use api_err::*;
-
 mod dtos;
 pub use dtos::*;
 
