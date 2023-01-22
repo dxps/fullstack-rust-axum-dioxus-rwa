@@ -1,15 +1,17 @@
-use std::sync::Arc;
-
+use crate::{
+    domain::model::UserId,
+    web_api::{
+        respond_bad_request, respond_internal_server_error, respond_not_found, respond_unauthorized,
+    },
+    AppError, AppState, AppUseCase,
+};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     Json,
 };
 use serde_json::{json, Value};
-
-use crate::{domain::model::UserId, handlers::respond_not_found, AppError, AppState, AppUseCase};
-
-use super::{respond_bad_request, respond_internal_server_error, respond_unauthorized};
+use std::sync::Arc;
 
 pub async fn get_user_profile(
     State(state): State<Arc<AppState>>,

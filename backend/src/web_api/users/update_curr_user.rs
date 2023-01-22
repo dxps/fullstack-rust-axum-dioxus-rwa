@@ -1,15 +1,15 @@
-use std::sync::Arc;
-
+use super::responses::respond_with_user_dto;
+use crate::{
+    domain::model::UserId,
+    web_api::{
+        respond_bad_request, respond_internal_server_error, respond_unauthorized, InputJson,
+    },
+    AppError, AppState,
+};
 use axum::{extract::State, http::StatusCode, Json};
 use serde::Deserialize;
 use serde_json::Value;
-
-use crate::{domain::model::UserId, AppError, AppState};
-
-use super::{
-    respond_bad_request, respond_internal_server_error, respond_unauthorized,
-    respond_with_user_dto, InputJson,
-};
+use std::sync::Arc;
 
 #[derive(Debug, Deserialize)]
 pub struct UpdateUserInputDTO {

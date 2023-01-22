@@ -1,12 +1,10 @@
-use std::sync::Arc;
-
-use axum::{http::StatusCode, Extension, Json};
-use serde_json::{json, Value};
-
 use crate::{
-    handlers::{respond_internal_server_error, respond_unauthorized},
+    web_api::{respond_internal_server_error, respond_unauthorized},
     AppError, AppState,
 };
+use axum::{http::StatusCode, Extension, Json};
+use serde_json::{json, Value};
+use std::sync::Arc;
 
 pub async fn get_articles(Extension(state): Extension<Arc<AppState>>) -> (StatusCode, Json<Value>) {
     match state.articles_mgr.get_articles().await {

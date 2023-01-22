@@ -1,14 +1,13 @@
-use std::sync::Arc;
-
-use axum::{extract::State, response::IntoResponse};
-// use axum_extra::extract::WithRejection;
-use serde::Deserialize;
-
-use crate::{token::create_jwt, AppError::AuthLoginFailed, AppState};
-
-use super::{
-    respond_internal_server_error, respond_unauthorized, respond_with_user_dto, InputJson,
+use super::responses::respond_with_user_dto;
+use crate::{
+    token::create_jwt,
+    web_api::{respond_internal_server_error, respond_unauthorized, InputJson},
+    AppError::AuthLoginFailed,
+    AppState,
 };
+use axum::{extract::State, response::IntoResponse};
+use serde::Deserialize;
+use std::sync::Arc;
 
 #[derive(Debug, Deserialize)]
 pub struct LoginUserInput {
@@ -25,7 +24,6 @@ pub struct LoginUserInputUserKey {
 pub async fn login_user(
     State(state): State<Arc<AppState>>,
     InputJson(input): InputJson<LoginUserInput>,
-    // WithRejection(Json(input), _): WithRejection<Json<LoginUserInput>, ApiError>,
 ) -> impl IntoResponse {
     match state
         .auth_mgr

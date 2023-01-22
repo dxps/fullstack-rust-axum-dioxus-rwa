@@ -1,11 +1,12 @@
-use std::sync::Arc;
-
+use super::responses::respond_with_user_dto;
+use crate::{
+    domain::model::UserId,
+    web_api::{respond_internal_server_error, respond_unauthorized},
+    AppError, AppState, AppUseCase,
+};
 use axum::{extract::State, http::StatusCode, Json};
 use serde_json::Value;
-
-use crate::{domain::model::UserId, AppError, AppState, AppUseCase};
-
-use super::{respond_internal_server_error, respond_unauthorized, respond_with_user_dto};
+use std::sync::Arc;
 
 pub async fn get_current_user(
     State(state): State<Arc<AppState>>,

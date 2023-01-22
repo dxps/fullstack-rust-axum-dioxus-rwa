@@ -15,7 +15,7 @@ use axum_extra::routing::SpaRouter;
 use backend::{
     config::get_config,
     db::{init_db_pool, ping_db},
-    handlers::{
+    web_api::{
         create_article, follow_user, get_articles, get_current_user, get_user_profile, login_user,
         register_user, unfollow_user, update_current_user,
     },

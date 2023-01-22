@@ -1,14 +1,12 @@
-use std::sync::Arc;
-
+use crate::{
+    token::Claims,
+    web_api::{respond_internal_server_error, respond_unauthorized, InputJson},
+    AppError, AppState,
+};
 use axum::{extract::State, http::StatusCode, Json};
 use serde::Deserialize;
 use serde_json::{json, Value};
-
-use crate::{
-    handlers::{respond_internal_server_error, respond_unauthorized, InputJson},
-    token::Claims,
-    AppError, AppState,
-};
+use std::sync::Arc;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateArticleInput {

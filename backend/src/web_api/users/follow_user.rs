@@ -1,20 +1,19 @@
-use std::sync::Arc;
-
+use crate::{
+    domain::model::UserId,
+    token::Claims,
+    web_api::{
+        get_user_profile, respond_bad_request, respond_internal_server_error, respond_not_found,
+        respond_unauthorized,
+    },
+    AppError, AppState,
+};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     Json,
 };
 use serde_json::{json, Value};
-
-use crate::{
-    domain::model::UserId,
-    handlers::{get_user_profile, respond_not_found},
-    token::Claims,
-    AppError, AppState,
-};
-
-use super::{respond_bad_request, respond_internal_server_error, respond_unauthorized};
+use std::sync::Arc;
 
 pub async fn follow_user(
     State(state): State<Arc<AppState>>,

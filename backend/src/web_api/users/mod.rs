@@ -6,12 +6,6 @@
 mod dtos;
 pub use dtos::*;
 
-mod responses;
-pub use responses::*;
-
-mod extractors;
-pub use extractors::*;
-
 mod register_user;
 pub use register_user::*;
 
@@ -30,7 +24,4 @@ pub use get_user_profile::*;
 mod follow_user;
 pub use follow_user::*;
 
-// Articles mgmt
-
-mod articles;
-pub use articles::*;
+mod responses;

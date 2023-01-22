@@ -1,18 +1,15 @@
-use std::sync::Arc;
-
-use axum::{extract::State, http::StatusCode};
-use serde::Deserialize;
-use serde_json::Value;
-
+use super::responses::respond_with_user_dto;
 use crate::{
     domain::model::User,
-    handlers::{respond_bad_request, respond_internal_server_error},
     token::create_jwt,
+    web_api::{respond_bad_request, respond_internal_server_error, InputJson},
     AppError::RegistrationEmailAlreadyExists,
     AppState,
 };
-
-use super::{respond_with_user_dto, InputJson};
+use axum::{extract::State, http::StatusCode};
+use serde::Deserialize;
+use serde_json::Value;
+use std::sync::Arc;
 
 #[derive(Debug, Deserialize)]
 pub struct RegisterUserInput {
