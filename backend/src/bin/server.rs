@@ -1,10 +1,3 @@
-use std::{
-    net::{IpAddr, Ipv6Addr, SocketAddr},
-    process::exit,
-    str::FromStr,
-    sync::Arc,
-};
-
 use axum::{
     extract::State,
     response::IntoResponse,
@@ -23,6 +16,12 @@ use backend::{
 };
 use clap::Parser;
 use serde_json::json;
+use std::{
+    net::{IpAddr, Ipv6Addr, SocketAddr},
+    process::exit,
+    str::FromStr,
+    sync::Arc,
+};
 use tower_http::trace::TraceLayer;
 
 #[tokio::main]
@@ -50,7 +49,7 @@ async fn main() {
         .expect("Failed to connect to database.");
     match ping_db(&db_conn_pool).await {
         true => log::info!(
-            "Connected to the database (with {} conns)",
+            "Connected to the database (with {} conns).",
             db_conn_pool.size()
         ),
         false => {
@@ -67,7 +66,7 @@ async fn main() {
         IpAddr::from_str(opt.addr.as_str()).unwrap_or(IpAddr::V6(Ipv6Addr::LOCALHOST)),
         opt.port,
     ));
-    log::info!("Listening on http://{}", sock_addr);
+    log::info!("Listening for requests on http://{} ...", sock_addr);
 
     axum::Server::bind(&sock_addr)
         .serve(routes.into_make_service())
