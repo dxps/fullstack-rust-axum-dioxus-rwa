@@ -1,7 +1,6 @@
+use super::UserProfile;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
-
-use super::UserProfile;
 
 /// `Article` domain model is what a User can read or write.
 #[derive(Serialize)]

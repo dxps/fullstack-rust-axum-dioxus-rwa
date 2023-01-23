@@ -1,12 +1,10 @@
-use std::sync::Arc;
-
-use axum::extract::FromRef;
-
 use crate::{
     db::DbConnPool,
     domain::logic::{ArticlesMgr, AuthMgr},
     repos::{ArticlesRepo, UsersRepo},
 };
+use axum::extract::FromRef;
+use std::sync::Arc;
 
 /// The (global) state of the app.
 #[derive(FromRef)]

@@ -1,9 +1,8 @@
-use axum::{extract::FromRequestParts, headers::Authorization, http::request::Parts, TypedHeader};
-
 use crate::{
     token::{verify_jwt, Claims, Token},
     AppError,
 };
+use axum::{extract::FromRequestParts, headers::Authorization, http::request::Parts, TypedHeader};
 
 // It extracts the token - if it exists - from the Authorization (HTTP request) header having the value of "Bearer <token>".
 pub async fn validate_token_extract_claims<S: Send + Sync>(

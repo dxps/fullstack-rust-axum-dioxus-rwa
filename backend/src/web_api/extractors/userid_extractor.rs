@@ -1,8 +1,6 @@
-use axum::{async_trait, extract::FromRequestParts, http::request::Parts};
-
-use crate::{domain::model::UserId, AppError};
-
 use super::validate_token_extract_claims;
+use crate::{domain::model::UserId, AppError};
+use axum::{async_trait, extract::FromRequestParts, http::request::Parts};
 
 #[async_trait]
 impl<S> FromRequestParts<S> for UserId

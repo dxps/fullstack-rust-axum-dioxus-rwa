@@ -1,7 +1,6 @@
+use super::validate_token_extract_claims;
 use crate::{token::Claims, AppError};
 use axum::{async_trait, extract::FromRequestParts, http::request::Parts};
-
-use super::validate_token_extract_claims;
 
 #[async_trait]
 impl<S> FromRequestParts<S> for Claims

@@ -1,14 +1,12 @@
-use std::sync::Arc;
-
-use chrono::{DateTime, Utc};
-use log::warn;
-use sqlx::{postgres::PgRow, Row};
-
 use crate::{
     db::DbConnPool,
     domain::model::{Article, UserProfile},
     AppError,
 };
+use chrono::{DateTime, Utc};
+use log::warn;
+use sqlx::{postgres::PgRow, Row};
+use std::sync::Arc;
 
 /// A Postgres specific implementation of `UserRepo`.
 #[derive(Clone)]

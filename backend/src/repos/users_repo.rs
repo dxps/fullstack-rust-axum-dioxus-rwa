@@ -1,12 +1,11 @@
 use std::sync::Arc;
 
-use sqlx::{postgres::PgRow, FromRow, Row};
-
 use crate::{
     db::DbConnPool,
     domain::model::{User, UserEntry, UserId, UserProfile},
     AppError, AppUseCase,
 };
+use sqlx::{postgres::PgRow, FromRow, Row};
 
 /// A Postgres specific implementation of `UserRepo`.
 pub struct UsersRepo {

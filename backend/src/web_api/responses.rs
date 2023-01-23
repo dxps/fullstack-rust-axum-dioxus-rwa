@@ -1,10 +1,9 @@
+use crate::AppError;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
 use serde_json::{json, Value};
-
-use crate::AppError;
 
 /// Utility function for responding with `500 Internal Server Error` code and an error description.
 pub fn respond_internal_server_error<E>(err: E) -> (StatusCode, axum::Json<Value>)

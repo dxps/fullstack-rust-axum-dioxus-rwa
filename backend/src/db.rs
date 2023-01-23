@@ -1,9 +1,7 @@
-use std::time::Duration;
-
+use crate::config::AppConfig;
 use secrecy::ExposeSecret;
 use sqlx::postgres::PgPoolOptions;
-
-use crate::config::AppConfig;
+use std::time::Duration;
 
 pub type DbConnPool = sqlx::Pool<sqlx::Postgres>;
 

@@ -3,13 +3,13 @@
 // re-exporting their entries with a shorter path, where relevant.
 //
 
-mod responses;
-pub use responses::*;
+mod articles;
+pub use articles::*;
 
 pub mod extractors;
 
+mod responses;
+pub use responses::*;
+
 mod users;
 pub use users::*;
-
-mod articles;
-pub use articles::*;

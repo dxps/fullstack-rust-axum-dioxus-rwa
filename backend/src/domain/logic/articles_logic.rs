@@ -1,12 +1,10 @@
-use std::sync::Arc;
-
-use slug::slugify;
-
 use crate::{
     domain::model::Article,
     repos::{ArticlesRepo, UsersRepo},
     AppError,
 };
+use slug::slugify;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct ArticlesMgr {
