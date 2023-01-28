@@ -22,6 +22,7 @@ use std::{
     str::FromStr,
     sync::Arc,
 };
+use tokio::signal::{self, unix::SignalKind};
 use tower_http::{
     cors::{Any, CorsLayer},
     trace::TraceLayer,
@@ -73,6 +74,7 @@ async fn main() {
 
     axum::Server::bind(&sock_addr)
         .serve(routes.into_make_service())
+        .with_graceful_shutdown(shutdown_signal())
         .await
         .expect("Unable to start server");
 }
@@ -103,6 +105,29 @@ async fn health_check(State(state): State<Arc<AppState>>) -> impl IntoResponse {
         true => Json(json!({ "database": "ok" })),
         false => Json(json!({ "database": "err" })),
     }
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("Failed to init Ctrl+C handler")
+    };
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(SignalKind::terminate())
+            .expect("Failed to init signal handler")
+            .recv()
+            .await
+    };
+    #[cfg(not(unix))]
+    let terminate = std::future::pending();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+    log::info!("Shutting down gracefully ...")
 }
 
 #[derive(Parser, Debug)]
