@@ -123,4 +123,13 @@ impl ArticlesRepo {
 
         Ok(created_at)
     }
+
+    pub async fn delete(&self, slug: String) -> Result<(), AppError> {
+        //
+        sqlx::query("DELETE FROM articles WHERE slug=$1")
+            .bind(slug)
+            .execute(self.dbcp.as_ref())
+            .await?;
+        Ok(())
+    }
 }

@@ -1,7 +1,7 @@
 use axum::{
     extract::State,
     response::IntoResponse,
-    routing::{get, post},
+    routing::{delete, get, post},
     Json, Router,
 };
 use axum_extra::routing::SpaRouter;
@@ -9,8 +9,8 @@ use backend::{
     config::get_config,
     db::{init_db_pool, ping_db},
     web_api::{
-        create_article, follow_user, get_articles, get_current_user, get_user_profile, login_user,
-        register_user, unfollow_user, update_current_user,
+        create_article, delete_article, follow_user, get_articles, get_current_user,
+        get_user_profile, login_user, register_user, unfollow_user, update_current_user,
     },
     AppState,
 };
@@ -94,6 +94,7 @@ fn routes(state: AppState, assets_dir: String) -> Router {
             post(follow_user).delete(unfollow_user),
         )
         .route("/api/articles", get(get_articles).post(create_article))
+        .route("/api/articles/:slug", delete(delete_article))
         .layer(tracing_layer)
         .layer(cors_layer)
         .with_state(Arc::new(state))

@@ -1,7 +1,4 @@
-use crate::{
-    web_api::{respond_internal_server_error, respond_unauthorized},
-    AppError, AppState,
-};
+use crate::{web_api::respond_internal_server_error, AppState};
 use axum::{extract::State, http::StatusCode, Json};
 use serde_json::{json, Value};
 use std::sync::Arc;
@@ -15,9 +12,6 @@ pub async fn get_articles(State(state): State<Arc<AppState>>) -> (StatusCode, Js
                 "articles_count": articles.len()
             })),
         ),
-        Err(err) => match err {
-            AppError::AuthUnauthorized => respond_unauthorized(err),
-            _ => respond_internal_server_error(err),
-        },
+        Err(err) => respond_internal_server_error(err),
     }
 }

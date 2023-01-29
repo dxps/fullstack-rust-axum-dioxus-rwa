@@ -63,4 +63,9 @@ impl ArticlesMgr {
             Err(err) => Err(AppError::from(err)),
         }
     }
+
+    pub async fn delete_article(&self, slug: String) -> Result<(), AppError> {
+        //
+        self.articles_repo.delete(slug).await
+    }
 }

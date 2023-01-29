@@ -99,7 +99,6 @@ impl From<sqlx::Error> for AppError {
 
 impl From<jsonwebtoken::errors::Error> for AppError {
     fn from(err: jsonwebtoken::errors::Error) -> Self {
-        log::debug!("From jwt err: {:?}", err);
         AppError::AuthInvalidTokenErr(err.to_string())
     }
 }
