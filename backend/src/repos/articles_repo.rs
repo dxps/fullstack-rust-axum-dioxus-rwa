@@ -88,13 +88,24 @@ impl ArticlesRepo {
                 created_at = row.get("created_at");
             }
             Err(err) => {
+                let mut res_err = AppError::Ignorable;
+                if let Some(e) = err.as_database_error() {
+                    if let Some(code) = e.code() {
+                        if code == "23505" && e.message().contains("slug") {
+                            res_err = AppError::AlreadyExists(format!("slug '{slug}'"))
+                        }
+                    }
+                } else {
+                    res_err = AppError::from(err)
+                };
+
                 if let Err(e) = txn.rollback().await {
                     warn!(
                         "Txn rollback of 1st insert on ArticlesRepo::add failed: {}",
                         e
                     )
                 };
-                return Err(AppError::from(err));
+                return Err(res_err);
             }
         }
 

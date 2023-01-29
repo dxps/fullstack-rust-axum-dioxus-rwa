@@ -21,6 +21,9 @@ pub type Result<T> = std::result::Result<T, AppError>;
 
 #[derive(Debug, Error)]
 pub enum AppError {
+    #[error("{0} already exists")]
+    AlreadyExists(String),
+
     #[error("email already exists")]
     RegistrationEmailAlreadyExists,
 
