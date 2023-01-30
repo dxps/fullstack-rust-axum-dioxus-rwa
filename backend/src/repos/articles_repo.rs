@@ -57,6 +57,11 @@ impl ArticlesRepo {
         }
     }
 
+    pub async fn get_article(&self, slug: String) -> Result<Article, AppError> {
+        //
+        todo!()
+    }
+
     pub async fn add(
         &self,
         slug: &String,

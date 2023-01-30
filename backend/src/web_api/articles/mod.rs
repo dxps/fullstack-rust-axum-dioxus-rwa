@@ -6,3 +6,6 @@ pub use get_articles::*;
 
 mod delete_article;
 pub use delete_article::*;
+
+mod update_article;
+pub use update_article::*;
