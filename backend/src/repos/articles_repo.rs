@@ -32,7 +32,6 @@ impl ArticlesRepo {
         )
         .map(|r: PgRow| {
             let following = r.get::<i64, _>("following") > 0;
-
             let author: UserProfile = UserProfile {
                 username: r.get("username"),
                 bio: r.get("bio"),
@@ -57,9 +56,37 @@ impl ArticlesRepo {
         }
     }
 
-    pub async fn get_article(&self, slug: String) -> Result<Article, AppError> {
+    pub async fn get_article(&self, slug: String) -> Result<Option<Article>, AppError> {
         //
-        todo!()
+        sqlx::query(
+            "SELECT COUNT(fa.user_id), a.id, a.slug, a.title, a.description, a.body, a.created_at, a.updated_at,
+             u.username, u.bio, u.image, COUNT(f.user_id) as following
+             FROM articles a
+             JOIN accounts u ON a.author_id = u.id
+             LEFT OUTER JOIN followings f ON u.id = f.user_id
+             LEFT OUTER JOIN favorited_articles fa ON a.id = fa.article_id
+             WHERE a.slug = $1
+             GROUP BY a.id, u.username, u.bio, u.image"
+        )
+        .bind(slug)
+        .map(|r: PgRow| {
+            let following = r.get::<i64, _>("following") > 0;
+            let author: UserProfile = UserProfile {
+                username: r.get("username"),
+                bio: r.get("bio"),
+                image: r.try_get("image").unwrap_or_default(),
+                following,
+            };
+            Article::new(
+                r.get("slug"),
+                r.get("title"),
+                r.get("description"),
+                r.get("body"),
+                r.get("created_at"),
+                r.get("updated_at"),
+                author,
+            )
+        }).fetch_optional(self.dbcp.as_ref()).await.map_err(|e| AppError::from(e))
     }
 
     pub async fn add(
@@ -105,8 +132,8 @@ impl ArticlesRepo {
                 };
 
                 if let Err(e) = txn.rollback().await {
-                    warn!(
-                        "Txn rollback of 1st insert on ArticlesRepo::add failed: {}",
+                    log::error!(
+                        "Txn rollback of 1st insert on ArticlesRepo::add(_) failed: {}",
                         e
                     )
                 };

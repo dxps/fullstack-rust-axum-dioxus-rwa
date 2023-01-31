@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use serde::Serialize;
 
 /// `Article` domain model is what a User can read or write.
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct Article {
     pub slug: String,
     pub title: String,

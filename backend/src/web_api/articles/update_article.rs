@@ -1,10 +1,13 @@
-use crate::{domain::model::Article, AppState};
+use crate::{
+    web_api::{respond_internal_server_error, respond_not_found},
+    AppError, AppState,
+};
 use axum::{
     extract::{Path, State},
     http::StatusCode,
     Json,
 };
-use chrono::DateTime;
+use log::error;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::sync::Arc;
@@ -30,12 +33,33 @@ pub async fn update_article(
 ) -> (StatusCode, Json<Value>) {
     //
     log::debug!("update_article >> input={:?}", input);
+    let res = state.articles_mgr.get_article(slug).await;
+    if let Err(err) = res {
+        return respond_not_found(err);
+    }
+    let res = res.unwrap();
+    if res.is_none() {
+        return respond_not_found(AppError::NothingFound);
+    }
+    let mut res = res.unwrap();
+
+    if let Some(title) = input.article.title {
+        res.title = title;
+    }
+    if let Some(description) = input.article.description {
+        res.description = description;
+    }
+    if let Some(body) = input.article.body {
+        res.body = body;
+    }
+    if let Some(tag_list) = input.article.tag_list {
+        res.tag_list = tag_list;
+    }
+
+    // match res {
+    //     Ok(article) => (StatusCode::OK, Json(json!({ "article": article }))),
+    //     Err(err) => respond_internal_server_error(err),
+    // }
 
     todo!()
-    // (
-    //     StatusCode::OK,
-    //     Json(json!({
-    //         "article": article
-    //     })),
-    // )
 }

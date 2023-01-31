@@ -25,6 +25,10 @@ impl ArticlesMgr {
         self.articles_repo.get_articles().await
     }
 
+    pub async fn get_article(&self, slug: String) -> Result<Option<Article>, AppError> {
+        self.articles_repo.get_article(slug).await
+    }
+
     pub async fn create_article(
         &self,
         title: String,
