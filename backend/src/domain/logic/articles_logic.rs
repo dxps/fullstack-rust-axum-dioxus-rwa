@@ -1,8 +1,10 @@
 use crate::{
     domain::model::Article,
     repos::{ArticlesRepo, UsersRepo},
+    web_api::respond_internal_server_error,
     AppError,
 };
+use serde::Deserialize;
 use slug::slugify;
 use std::sync::Arc;
 
@@ -10,6 +12,15 @@ use std::sync::Arc;
 pub struct ArticlesMgr {
     articles_repo: ArticlesRepo,
     user_repo: Arc<UsersRepo>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateArticleInput {
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub body: Option<String>,
+    #[serde(rename = "tagList")]
+    pub tag_list: Option<Vec<String>>,
 }
 
 impl ArticlesMgr {
@@ -71,5 +82,36 @@ impl ArticlesMgr {
     pub async fn delete_article(&self, slug: String) -> Result<(), AppError> {
         //
         self.articles_repo.delete(slug).await
+    }
+
+    pub async fn update_article(
+        &self,
+        slug: String,
+        input: UpdateArticleInput,
+    ) -> Result<Article, AppError> {
+        //
+        log::debug!("update_article >> input={:?}", input);
+        let res = self.get_article(slug).await?;
+        if res.is_none() {
+            return Err(AppError::NothingFound);
+        }
+        let mut res = res.unwrap();
+
+        // Fill-in any of the input's elements.
+        if let Some(title) = input.title {
+            res.title = title;
+        }
+        if let Some(description) = input.description {
+            res.description = description;
+        }
+        if let Some(body) = input.body {
+            res.body = body;
+        }
+        if let Some(tag_list) = input.tag_list {
+            res.tag_list = tag_list;
+        }
+        // Persist the changes.
+
+        todo!()
     }
 }
