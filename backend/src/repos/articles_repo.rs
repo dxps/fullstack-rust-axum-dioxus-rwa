@@ -177,8 +177,35 @@ impl ArticlesRepo {
         Ok(())
     }
 
-    pub async fn update(&self, article: Article) -> Result<(), AppError> {
+    pub async fn update(&self, a: Article) -> Result<(), AppError> {
         //
-        todo!()
+        let mut txn = self.dbcp.begin().await?;
+        if let Err(err) = sqlx::query("UPDATE articles SET slug=$1, title=$2, description=$3, body=$4, updated_at=$5 WHERE slug=$1")
+            .bind(a.slug.clone()).bind(a.title).bind(a.description).bind(a.body).bind(a.updated_at)
+            .execute(&mut txn).await {
+                log::debug!("Error on update: {}", err);
+                // Same error handling as in `add`.
+                let mut res_err = AppError::Ignorable;
+                if let Some(e) = err.as_database_error() {
+                    if let Some(code) = e.code() {
+                        if code == "23505" && e.message().contains("slug") {
+                            res_err = AppError::AlreadyExists(format!("slug '{}'", a.slug))
+                        }
+                    }
+                } else {
+                    res_err = AppError::from(err)
+                };
+
+                if let Err(e) = txn.rollback().await {
+                    log::error!(
+                        "Txn rollback of 1st update on ArticlesRepo::update(_) failed: {}",
+                        e
+                    )
+                };
+                return Err(res_err);
+            }
+
+        txn.commit().await?;
+        Ok(())
     }
 }

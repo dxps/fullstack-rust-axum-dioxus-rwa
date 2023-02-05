@@ -95,23 +95,23 @@ impl ArticlesMgr {
         if res.is_none() {
             return Err(AppError::NothingFound);
         }
-        let mut res = res.unwrap();
+        let mut a = res.unwrap();
 
         // Fill-in any of the input's elements.
         if let Some(title) = input.title {
-            res.title = title;
+            a.title = title;
         }
         if let Some(description) = input.description {
-            res.description = description;
+            a.description = description;
         }
         if let Some(body) = input.body {
-            res.body = body;
+            a.body = body;
         }
         if let Some(tag_list) = input.tag_list {
-            res.tag_list = tag_list;
+            a.tag_list = tag_list;
         }
         // Persist the changes.
 
-        todo!()
+        self.articles_repo.update(a.clone()).await.map(|_| a)
     }
 }

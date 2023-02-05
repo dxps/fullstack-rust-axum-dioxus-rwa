@@ -42,7 +42,7 @@ impl Into<User> for UserEntry {
 
 /// A common and concise representation of a `User`,
 /// included into various use cases responses.
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct UserProfile {
     pub username: String,
     pub bio: String,
