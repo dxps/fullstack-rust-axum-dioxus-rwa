@@ -44,8 +44,22 @@ impl Into<User> for UserEntry {
 /// included into various use cases responses.
 #[derive(Clone, Debug, Serialize)]
 pub struct UserProfile {
+    #[serde(skip_serializing)]
+    pub user_id: i64,
     pub username: String,
     pub bio: String,
     pub image: Option<String>,
     pub following: bool,
+}
+
+impl UserProfile {
+    pub fn new_basic(user_id: i64) -> Self {
+        Self {
+            user_id,
+            username: "".into(),
+            bio: "".into(),
+            image: None,
+            following: false,
+        }
+    }
 }

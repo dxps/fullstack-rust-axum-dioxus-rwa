@@ -139,6 +139,7 @@ impl UsersRepo {
         .map(|row: PgRow| {
             user_id = row.get("id");
             UserProfile {
+                user_id,
                 username: username.clone(),
                 bio: row.get("bio"),
                 image: row.get("image"),
@@ -162,6 +163,7 @@ impl UsersRepo {
         )
         .bind(user_id)
         .map(|row: PgRow| UserProfile {
+            user_id,
             username: row.get("username"),
             bio: row.get("bio"),
             image: row.get("image"),

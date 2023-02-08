@@ -3,7 +3,7 @@ use crate::{
     domain::model::{Article, UserProfile},
     AppError,
 };
-use chrono::{DateTime, Utc};
+
 use log::warn;
 use sqlx::{postgres::PgRow, Row};
 use std::sync::Arc;
@@ -24,16 +24,17 @@ impl ArticlesRepo {
         let res = sqlx::query(
             "select count(fa.user_id) as favorites_count,
                     a.id, a.slug, a.title, a.description, a.body, a.created_at, a.updated_at,
-                    u.username, u.bio, u.image, count(f.user_id) as following 
+                    u.id as user_id, u.username, u.bio, u.image, count(f.user_id) as following 
             from articles a
             join accounts u on a.author_id = u.id 
             left outer join followings f on u.id = f.user_id 
             left outer join favorited_articles fa on a.id = fa.article_id
-            group by a.id, u.username, u.bio, u.image;",
+            group by a.id, u.id, u.username, u.bio, u.image;",
         )
         .map(|r: PgRow| {
             let following = r.get::<i64, _>("following") > 0;
             let author: UserProfile = UserProfile {
+                user_id: r.get("user_id"),
                 username: r.get("username"),
                 bio: r.get("bio"),
                 image: r.try_get("image").unwrap_or_default(),
@@ -61,18 +62,19 @@ impl ArticlesRepo {
         //
         sqlx::query(
             "SELECT COUNT(fa.user_id), a.id, a.slug, a.title, a.description, a.body, a.created_at, a.updated_at,
-             u.username, u.bio, u.image, COUNT(f.user_id) as following
+             u.id as user_id, u.username, u.bio, u.image, COUNT(f.user_id) as following
              FROM articles a
              JOIN accounts u ON a.author_id = u.id
              LEFT OUTER JOIN followings f ON u.id = f.user_id
              LEFT OUTER JOIN favorited_articles fa ON a.id = fa.article_id
              WHERE a.slug = $1
-             GROUP BY a.id, u.username, u.bio, u.image"
+             GROUP BY a.id, u.id, u.username, u.bio, u.image"
         )
         .bind(slug)
         .map(|r: PgRow| {
             let following = r.get::<i64, _>("following") > 0;
             let author: UserProfile = UserProfile {
+                user_id: r.get("user_id"),
                 username: r.get("username"),
                 bio: r.get("bio"),
                 image: r.try_get("image").unwrap_or_default(),
@@ -90,42 +92,34 @@ impl ArticlesRepo {
         }).fetch_optional(self.dbcp.as_ref()).await.map_err(|e| AppError::from(e))
     }
 
-    pub async fn add(
-        &self,
-        slug: &String,
-        title: &String,
-        description: &String,
-        body: &String,
-        tag_list: &Vec<String>,
-        author_id: i64,
-    ) -> Result<DateTime<Utc>, AppError> {
+    /// Add an `Article` into the store. It updates its `id`, `created_at` and `updated_at` attributes.
+    pub async fn add(&self, a: &mut Article) -> Result<(), AppError> {
         //
         let mut txn = self.dbcp.begin().await?;
-        let article_id: i64;
-        let created_at: DateTime<Utc>;
 
         match sqlx::query(
             "INSERT INTO articles(slug, title, description, body, author_id) 
             VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at",
         )
-        .bind(slug)
-        .bind(title)
-        .bind(description)
-        .bind(body)
-        .bind(author_id)
+        .bind(&a.slug)
+        .bind(&a.title)
+        .bind(&a.description)
+        .bind(&a.body)
+        .bind(&a.author.user_id)
         .fetch_one(&mut txn)
         .await
         {
             Ok(row) => {
-                article_id = row.get("id");
-                created_at = row.get("created_at");
+                a.id = row.get("id");
+                a.created_at = row.get("created_at");
             }
             Err(err) => {
+                dbg!(&err);
                 let mut res_err = AppError::Ignorable;
                 if let Some(e) = err.as_database_error() {
                     if let Some(code) = e.code() {
                         if code == "23505" && e.message().contains("slug") {
-                            res_err = AppError::AlreadyExists(format!("slug '{slug}'"))
+                            res_err = AppError::AlreadyExists(format!("slug '{}'", a.slug))
                         }
                     }
                 } else {
@@ -142,11 +136,11 @@ impl ArticlesRepo {
             }
         }
 
-        for tag in tag_list {
+        for tag in &a.tag_list {
             if let Err(err) =
-                sqlx::query("INSERT INTO tags_articles(tag,article_id) VALUES ($1, $2)")
+                sqlx::query("INSERT INTO tags_articles(tag, article_id) VALUES ($1, $2)")
                     .bind(tag)
-                    .bind(article_id)
+                    .bind(a.id)
                     .execute(&mut txn)
                     .await
             {
@@ -165,7 +159,7 @@ impl ArticlesRepo {
 
         txn.commit().await?;
 
-        Ok(created_at)
+        Ok(())
     }
 
     pub async fn delete(&self, slug: String) -> Result<(), AppError> {
@@ -177,33 +171,75 @@ impl ArticlesRepo {
         Ok(())
     }
 
-    pub async fn update(&self, a: Article) -> Result<(), AppError> {
+    pub async fn update(&self, a: &mut Article) -> Result<(), AppError> {
         //
         let mut txn = self.dbcp.begin().await?;
-        if let Err(err) = sqlx::query("UPDATE articles SET slug=$1, title=$2, description=$3, body=$4, updated_at=$5 WHERE slug=$1")
-            .bind(a.slug.clone()).bind(a.title).bind(a.description).bind(a.body).bind(a.updated_at)
-            .execute(&mut txn).await {
-                log::debug!("Error on update: {}", err);
-                // Same error handling as in `add`.
-                let mut res_err = AppError::Ignorable;
-                if let Some(e) = err.as_database_error() {
-                    if let Some(code) = e.code() {
-                        if code == "23505" && e.message().contains("slug") {
-                            res_err = AppError::AlreadyExists(format!("slug '{}'", a.slug))
-                        }
+        if let Err(err) = sqlx::query(
+            "UPDATE articles SET slug=$1, title=$2, description=$3, body=$4, updated_at=$5 
+            WHERE slug=$1 RETURNING id",
+        )
+        .bind(&a.slug)
+        .bind(&a.title)
+        .bind(&a.description)
+        .bind(&a.body)
+        .bind(a.updated_at)
+        .map(|r: PgRow| a.id = r.get("id"))
+        .fetch_one(&mut txn)
+        .await
+        {
+            log::debug!("Error on update: {}", err);
+            // Same error handling as in `add`.
+            // TODO: Include the following logic into `AppError::from(err)`.
+            let mut res_err = AppError::Ignorable;
+            if let Some(e) = err.as_database_error() {
+                if let Some(code) = e.code() {
+                    if code == "23505" && e.message().contains("slug") {
+                        res_err = AppError::AlreadyExists(format!("slug '{}'", a.slug))
                     }
-                } else {
-                    res_err = AppError::from(err)
-                };
+                }
+            } else {
+                res_err = AppError::from(err)
+            };
 
-                if let Err(e) = txn.rollback().await {
-                    log::error!(
-                        "Txn rollback of 1st update on ArticlesRepo::update(_) failed: {}",
-                        e
-                    )
-                };
-                return Err(res_err);
+            if let Err(e) = txn.rollback().await {
+                log::error!("Txn rollback after update on articles failed: {}", e)
+            };
+            return Err(res_err);
+        }
+
+        if let Err(err) = sqlx::query("DELETE FROM tags_articles WHERE article_id=$1")
+            .bind(a.id)
+            .execute(&mut txn)
+            .await
+        {
+            log::debug!("Error on delete tags: {}", err);
+            let res_err = AppError::from(err);
+            if let Err(e) = txn.rollback().await {
+                log::error!("Txn rollback after delete from tags_articles failed: {}", e)
+            };
+            return Err(res_err);
+        }
+
+        for tag in &a.tag_list {
+            if let Err(err) =
+                sqlx::query("INSERT INTO tags_articles(tag, article_id) VALUES ($1, $2)")
+                    .bind(tag)
+                    .bind(a.id)
+                    .execute(&mut txn)
+                    .await
+            {
+                match txn.rollback().await {
+                    Ok(()) => (),
+                    Err(e) => {
+                        warn!(
+                            "Txn rollback after inserting into tags_articles failed: {}",
+                            e
+                        )
+                    }
+                }
+                return Err(AppError::from(err));
             }
+        }
 
         txn.commit().await?;
         Ok(())

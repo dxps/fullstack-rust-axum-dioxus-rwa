@@ -1,7 +1,6 @@
 use crate::{
     domain::model::Article,
     repos::{ArticlesRepo, UsersRepo},
-    web_api::respond_internal_server_error,
     AppError,
 };
 use serde::Deserialize;
@@ -50,30 +49,16 @@ impl ArticlesMgr {
     ) -> Result<Article, AppError> {
         //
         let slug = slugify(&title);
-        match self
-            .articles_repo
-            .add(&slug, &title, &description, &body, &tag_list, author_id)
-            .await
-        {
-            Ok(created_at) => {
+        let mut a = Article::new_basic(slug, title, description, body, tag_list, author_id);
+        match self.articles_repo.add(&mut a).await {
+            Ok(()) => {
                 // TODO: Check if it's reliable.
-                let author_user_profile = self.user_repo.get_profile_by_id(author_id).await?;
+                a.author = self.user_repo.get_profile_by_id(author_id).await?;
                 // match self.user_repo.get_profile_by_id(author_id).await {
                 //     Ok(profile) => author_user_profile = profile,
                 //     Err(err) => return Err(AppError::from(err)),
                 // };
-                Ok(Article {
-                    slug,
-                    title,
-                    description,
-                    body,
-                    tag_list,
-                    created_at,
-                    updated_at: created_at,
-                    favorited: false,
-                    favorites_count: 0,
-                    author: author_user_profile,
-                })
+                Ok(a)
             }
             Err(err) => Err(AppError::from(err)),
         }
@@ -110,8 +95,8 @@ impl ArticlesMgr {
         if let Some(tag_list) = input.tag_list {
             a.tag_list = tag_list;
         }
-        // Persist the changes.
 
-        self.articles_repo.update(a.clone()).await.map(|_| a)
+        // Persist the changes.
+        self.articles_repo.update(&mut a).await.map(|_| a)
     }
 }
