@@ -5,7 +5,7 @@ use crate::{
 };
 
 use log::warn;
-use sqlx::{postgres::PgRow, Row};
+use sqlx::{postgres::PgRow, Pool, Postgres, Row};
 use std::sync::Arc;
 
 /// A Postgres specific implementation of `UserRepo`.
@@ -21,7 +21,8 @@ impl ArticlesRepo {
 
     pub async fn get_articles(&self) -> Result<Vec<Article>, AppError> {
         //
-        let res = sqlx::query(
+        let conn = self.dbcp.as_ref();
+        let mut res = sqlx::query(
             "select count(fa.user_id) as favorites_count,
                     a.id, a.slug, a.title, a.description, a.body, a.created_at, a.updated_at,
                     u.id as user_id, u.username, u.bio, u.image, count(f.user_id) as following 
@@ -41,6 +42,7 @@ impl ArticlesRepo {
                 following,
             };
             Article::new(
+                r.get("id"),
                 r.get("slug"),
                 r.get("title"),
                 r.get("description"),
@@ -50,17 +52,23 @@ impl ArticlesRepo {
                 author,
             )
         })
-        .fetch_all(self.dbcp.as_ref())
-        .await;
-        match res {
-            Ok(entry) => Ok(entry),
-            Err(err) => Err(AppError::from(err)),
+        .fetch_all(conn)
+        .await
+        .map_err(|err| AppError::from(err));
+
+        if let Ok(ref mut articles) = res {
+            for mut a in articles {
+                self.get_tags(conn, &mut a).await?
+            }
         }
+
+        res
     }
 
     pub async fn get_article(&self, slug: String) -> Result<Option<Article>, AppError> {
         //
-        sqlx::query(
+        let conn = self.dbcp.as_ref();
+        let mut article = sqlx::query(
             "SELECT COUNT(fa.user_id), a.id, a.slug, a.title, a.description, a.body, a.created_at, a.updated_at,
              u.id as user_id, u.username, u.bio, u.image, COUNT(f.user_id) as following
              FROM articles a
@@ -81,6 +89,7 @@ impl ArticlesRepo {
                 following,
             };
             Article::new(
+                r.get("id"),
                 r.get("slug"),
                 r.get("title"),
                 r.get("description"),
@@ -89,7 +98,24 @@ impl ArticlesRepo {
                 r.get("updated_at"),
                 author,
             )
-        }).fetch_optional(self.dbcp.as_ref()).await.map_err(|e| AppError::from(e))
+        }).fetch_optional(conn).await?; // Note: Used `?` instead of `.map_err(|e| AppError::from(e))`
+
+        if let Some(ref mut a) = article {
+            self.get_tags(conn, a).await?;
+            return Ok(Some(a.clone()));
+        }
+
+        Ok(article)
+    }
+
+    async fn get_tags(&self, conn: &Pool<Postgres>, a: &mut Article) -> Result<(), AppError> {
+        //
+        sqlx::query("SELECT tag FROM tags_articles WHERE article_id = $1")
+            .bind(a.id)
+            .map(|r: PgRow| a.tag_list.push(r.get("tag")))
+            .fetch_all(conn)
+            .await?;
+        Ok(())
     }
 
     /// Add an `Article` into the store. It updates its `id`, `created_at` and `updated_at` attributes.

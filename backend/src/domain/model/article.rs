@@ -21,6 +21,7 @@ pub struct Article {
 
 impl Article {
     pub fn new(
+        id: i64,
         slug: String,
         title: String,
         description: String,
@@ -30,7 +31,7 @@ impl Article {
         author: UserProfile,
     ) -> Self {
         Self {
-            id: 0,
+            id,
             slug,
             title,
             description,
