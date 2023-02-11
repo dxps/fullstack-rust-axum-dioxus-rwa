@@ -140,22 +140,10 @@ impl ArticlesRepo {
                 a.updated_at = a.created_at
             }
             Err(err) => {
-                let mut res_err = AppError::Ignorable;
-                if let Some(e) = err.as_database_error() {
-                    if let Some(code) = e.code() {
-                        if code == "23505" && e.message().contains("slug") {
-                            res_err = AppError::AlreadyExists(format!("slug '{}'", a.slug))
-                        }
-                    }
-                } else {
-                    res_err = AppError::from(err)
-                };
+                let res_err = ArticlesRepo::render_app_error(err, &a.slug);
 
                 if let Err(e) = txn.rollback().await {
-                    log::error!(
-                        "Txn rollback of 1st insert on ArticlesRepo::add(_) failed: {}",
-                        e
-                    )
+                    log::error!("Txn rollback after insert into articles failed: {}", e)
                 };
                 return Err(res_err);
             }
@@ -163,7 +151,7 @@ impl ArticlesRepo {
 
         if let Err(_) = self.set_tags(&mut txn, a.id, &a.tag_list, true).await {
             if let Err(err) = &mut txn.rollback().await {
-                log::error!("Txn rollback failed: {}", err);
+                log::error!("Txn rollback after set_tags(_) failed: {}", err);
                 return Err(AppError::InternalErr);
             }
         } else {
@@ -198,19 +186,7 @@ impl ArticlesRepo {
         .fetch_one(&mut txn)
         .await
         {
-            log::debug!("Error on update: {}", err);
-            // Same error handling as in `add`.
-            // TODO: Include the following logic into `AppError::from(err)`.
-            let mut res_err = AppError::Ignorable;
-            if let Some(e) = err.as_database_error() {
-                if let Some(code) = e.code() {
-                    if code == "23505" && e.message().contains("slug") {
-                        res_err = AppError::AlreadyExists(format!("slug '{}'", a.slug))
-                    }
-                }
-            } else {
-                res_err = AppError::from(err)
-            };
+            let res_err = ArticlesRepo::render_app_error(err, &a.slug);
 
             if let Err(e) = txn.rollback().await {
                 log::error!("Txn rollback after update on articles failed: {}", e)
@@ -262,5 +238,19 @@ impl ArticlesRepo {
         }
 
         Ok(())
+    }
+
+    fn render_app_error(from_db_err: sqlx::Error, slug: &String) -> AppError {
+        let mut res_err = AppError::Ignorable;
+        if let Some(e) = from_db_err.as_database_error() {
+            if let Some(code) = e.code() {
+                if code == "23505" && e.message().contains("slug") {
+                    res_err = AppError::AlreadyExists(format!("slug '{}'", slug))
+                }
+            }
+        } else {
+            res_err = AppError::from(from_db_err)
+        };
+        res_err
     }
 }
