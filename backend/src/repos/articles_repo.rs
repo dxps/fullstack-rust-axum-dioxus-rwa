@@ -4,8 +4,7 @@ use crate::{
     AppError,
 };
 
-use log::warn;
-use sqlx::{postgres::PgRow, Pool, Postgres, Row};
+use sqlx::{postgres::PgRow, Pool, Postgres, Row, Transaction};
 use std::sync::Arc;
 
 /// A Postgres specific implementation of `UserRepo`.
@@ -98,7 +97,7 @@ impl ArticlesRepo {
                 r.get("updated_at"),
                 author,
             )
-        }).fetch_optional(conn).await?; // Note: Used `?` instead of `.map_err(|e| AppError::from(e))`
+        }).fetch_optional(conn).await?;
 
         if let Some(ref mut a) = article {
             self.get_tags(conn, a).await?;
@@ -138,9 +137,9 @@ impl ArticlesRepo {
             Ok(row) => {
                 a.id = row.get("id");
                 a.created_at = row.get("created_at");
+                a.updated_at = a.created_at
             }
             Err(err) => {
-                dbg!(&err);
                 let mut res_err = AppError::Ignorable;
                 if let Some(e) = err.as_database_error() {
                     if let Some(code) = e.code() {
@@ -162,28 +161,14 @@ impl ArticlesRepo {
             }
         }
 
-        for tag in &a.tag_list {
-            if let Err(err) =
-                sqlx::query("INSERT INTO tags_articles(tag, article_id) VALUES ($1, $2)")
-                    .bind(tag)
-                    .bind(a.id)
-                    .execute(&mut txn)
-                    .await
-            {
-                match txn.rollback().await {
-                    Ok(()) => (),
-                    Err(e) => {
-                        warn!(
-                            "Txn rollback of 2nd insert on ArticlesRepo::add failed: {}",
-                            e
-                        )
-                    }
-                }
-                return Err(AppError::from(err));
+        if let Err(_) = self.set_tags(&mut txn, a.id, &a.tag_list, true).await {
+            if let Err(err) = &mut txn.rollback().await {
+                log::error!("Txn rollback failed: {}", err);
+                return Err(AppError::InternalErr);
             }
+        } else {
+            txn.commit().await?;
         }
-
-        txn.commit().await?;
 
         Ok(())
     }
@@ -233,41 +218,49 @@ impl ArticlesRepo {
             return Err(res_err);
         }
 
-        if let Err(err) = sqlx::query("DELETE FROM tags_articles WHERE article_id=$1")
-            .bind(a.id)
-            .execute(&mut txn)
-            .await
-        {
-            log::debug!("Error on delete tags: {}", err);
-            let res_err = AppError::from(err);
-            if let Err(e) = txn.rollback().await {
-                log::error!("Txn rollback after delete from tags_articles failed: {}", e)
-            };
-            return Err(res_err);
+        if let Err(_) = self.set_tags(&mut txn, a.id, &a.tag_list, false).await {
+            if let Err(err) = &mut txn.rollback().await {
+                log::error!("Txn rollback failed: {}", err);
+                return Err(AppError::InternalErr);
+            }
+        } else {
+            txn.commit().await?;
         }
+        Ok(())
+    }
 
-        for tag in &a.tag_list {
-            if let Err(err) =
-                sqlx::query("INSERT INTO tags_articles(tag, article_id) VALUES ($1, $2)")
-                    .bind(tag)
-                    .bind(a.id)
-                    .execute(&mut txn)
-                    .await
+    async fn set_tags<'a>(
+        &self,
+        txn: &mut Transaction<'a, Postgres>,
+        article_id: i64,
+        tag_list: &Vec<String>,
+        is_new: bool,
+    ) -> Result<(), sqlx::Error> {
+        //
+        if !is_new {
+            if let Err(err) = sqlx::query("DELETE FROM tags_articles WHERE article_id=$1")
+                .bind(article_id)
+                .execute(&mut *txn)
+                .await
             {
-                match txn.rollback().await {
-                    Ok(()) => (),
-                    Err(e) => {
-                        warn!(
-                            "Txn rollback after inserting into tags_articles failed: {}",
-                            e
-                        )
-                    }
-                }
-                return Err(AppError::from(err));
+                log::error!("Error on delete tags: {}", err);
+                return Err(err);
             }
         }
 
-        txn.commit().await?;
+        for tag in tag_list {
+            if let Err(err) =
+                sqlx::query("INSERT INTO tags_articles(tag, article_id) VALUES ($1, $2)")
+                    .bind(tag)
+                    .bind(article_id)
+                    .execute(&mut *txn)
+                    .await
+            {
+                log::error!("Error on insert tags: {}", err);
+                return Err(err);
+            }
+        }
+
         Ok(())
     }
 }
