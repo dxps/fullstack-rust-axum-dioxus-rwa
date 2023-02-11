@@ -52,12 +52,7 @@ impl ArticlesMgr {
         let mut a = Article::new_basic(slug, title, description, body, tag_list, author_id);
         match self.articles_repo.add(&mut a).await {
             Ok(()) => {
-                // TODO: Check if it's reliable.
                 a.author = self.user_repo.get_profile_by_id(author_id).await?;
-                // match self.user_repo.get_profile_by_id(author_id).await {
-                //     Ok(profile) => author_user_profile = profile,
-                //     Err(err) => return Err(AppError::from(err)),
-                // };
                 Ok(a)
             }
             Err(err) => Err(AppError::from(err)),
@@ -96,7 +91,6 @@ impl ArticlesMgr {
             a.tag_list = tag_list;
         }
 
-        // Persist the changes.
         self.articles_repo.update(&mut a).await.map(|_| a)
     }
 }

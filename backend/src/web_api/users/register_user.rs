@@ -41,12 +41,15 @@ pub async fn register_user(
 ) -> (StatusCode, axum::Json<Value>) {
     let pwd = input.user.password.clone();
     let user: User = input.into();
-    match &state.auth_mgr.register_user(&user, pwd).await {
-        Ok(id) => match create_jwt(*id, user.email.clone(), user.username.clone()) {
+    match state.auth_mgr.register_user(&user, pwd).await {
+        Ok(id) => match create_jwt(id, user.email.clone(), user.username.clone()) {
             Ok(token) => {
                 respond_with_user_dto(user.email, Some(token), user.username, "".to_string(), None)
             }
-            Err(_) => todo!(),
+            Err(err) => {
+                log::error!("jwt creation failed: {err}");
+                respond_internal_server_error(err)
+            }
         },
         Err(err) => match err {
             RegistrationEmailAlreadyExists => respond_bad_request(err),
