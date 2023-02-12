@@ -1,4 +1,5 @@
 use crate::{
+    domain::model::UserId,
     web_api::{respond_internal_server_error, respond_unauthorized},
     AppState,
 };
@@ -12,6 +13,7 @@ use std::sync::Arc;
 
 pub async fn delete_article(
     State(state): State<Arc<AppState>>,
+    _: UserId,
     Path(slug): Path<String>,
 ) -> (StatusCode, Json<Value>) {
     //

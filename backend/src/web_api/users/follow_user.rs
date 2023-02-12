@@ -18,9 +18,8 @@ use std::sync::Arc;
 pub async fn follow_user(
     State(state): State<Arc<AppState>>,
     Path(username): Path<String>,
-    user_claims: Claims,
+    curr_user_id: UserId,
 ) -> (StatusCode, Json<Value>) {
-    let curr_user_id = UserId::from(user_claims.sub);
     let profile = state.user_repo.follow_user(&curr_user_id, &username).await;
 
     match profile {
