@@ -20,6 +20,8 @@ pub async fn follow_user(
     Path(username): Path<String>,
     curr_user_id: UserId,
 ) -> (StatusCode, Json<Value>) {
+    //
+
     let profile = state.user_repo.follow_user(&curr_user_id, &username).await;
 
     match profile {
@@ -28,12 +30,10 @@ pub async fn follow_user(
             AppError::Ignorable => {
                 get_user_profile(State(state), curr_user_id, Path(username)).await
             }
-            AppError::NothingFound => respond_not_found(err),
+            AppError::NotFound(_) => respond_not_found(err),
             AppError::AuthInvalidInput => respond_bad_request(err),
             AppError::AuthUnauthorized => respond_unauthorized(err),
-            AppError::AuthInvalidTokenErr(msg) => {
-                respond_unauthorized(AppError::AuthInvalidTokenErr(msg))
-            }
+            AppError::AuthInvalidTokenErr(_) => respond_unauthorized(err),
             _ => respond_internal_server_error(err),
         },
     }
@@ -56,7 +56,7 @@ pub async fn unfollow_user(
             AppError::Ignorable => {
                 get_user_profile(State(state), curr_user_id, Path(username)).await
             }
-            AppError::NothingFound => respond_not_found(err),
+            AppError::NotFound(_) => respond_not_found(err),
             AppError::AuthInvalidInput => respond_bad_request(err),
             AppError::AuthUnauthorized => respond_unauthorized(err),
             AppError::AuthInvalidTokenErr(msg) => {

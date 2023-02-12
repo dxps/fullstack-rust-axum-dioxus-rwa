@@ -1,11 +1,10 @@
-use std::sync::Arc;
-
 use crate::{
     db::DbConnPool,
     domain::model::{User, UserEntry, UserId, UserProfile},
     AppError, AppUseCase,
 };
 use sqlx::{postgres::PgRow, FromRow, Row};
+use std::sync::Arc;
 
 /// A Postgres specific implementation of `UserRepo`.
 pub struct UsersRepo {
@@ -69,11 +68,20 @@ impl UsersRepo {
         followed_username: &String,
     ) -> Result<UserProfile, AppError> {
         // First, get the followed user_id.
-        let followed_user_id =
-            sqlx::query_as::<_, UserId>("SELECT id FROM accounts WHERE username = $1")
-                .bind(followed_username)
-                .fetch_one(self.dbcp.as_ref())
-                .await?;
+        let followed_user_id: UserId;
+        match sqlx::query_as::<_, UserId>("SELECT id FROM accounts WHERE username = $1")
+            .bind(followed_username)
+            .fetch_one(self.dbcp.as_ref())
+            .await
+        {
+            Ok(id) => followed_user_id = id,
+            Err(err) => match err {
+                sqlx::Error::RowNotFound => {
+                    return Err(AppError::NotFound("followed username".into()))
+                }
+                _ => return Err(AppError::InternalErr),
+            },
+        };
         match sqlx::query("INSERT INTO followings VALUES($1, $2)")
             .bind(curr_user_id.as_value())
             .bind(followed_user_id.as_value())

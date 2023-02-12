@@ -79,7 +79,7 @@ impl ArticlesMgr {
         log::debug!("update_article >> input={:?}", input);
         let res = self.get_article(slug).await?;
         if res.is_none() {
-            return Err(AppError::NothingFound);
+            return Err(AppError::NotFound("article".into()));
         }
         let mut a = res.unwrap();
 

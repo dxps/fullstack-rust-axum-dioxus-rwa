@@ -34,7 +34,7 @@ pub async fn update_article(
                 AppError::AuthUnauthorized => respond_unauthorized(err),
                 AppError::AuthInvalidTokenErr(_) => respond_unauthorized(err),
                 AppError::AuthInvalidInput => respond_bad_request(err),
-                AppError::NothingFound => respond_not_found(err),
+                AppError::NotFound(_) => respond_not_found(err),
                 _ => respond_internal_server_error(err),
             }
         }

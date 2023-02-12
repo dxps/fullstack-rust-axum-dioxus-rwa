@@ -39,8 +39,8 @@ pub enum AppError {
     #[error("invalid input")]
     AuthInvalidInput,
 
-    #[error("entry not found")]
-    NothingFound,
+    #[error("{0} not found")]
+    NotFound(String),
 
     #[error("internal error")]
     InternalErr,
@@ -72,7 +72,7 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
             },
 
             AppUseCase::GetUserProfile => match &err {
-                sqlx::Error::RowNotFound => AppError::NothingFound,
+                sqlx::Error::RowNotFound => AppError::NotFound("profile".into()),
                 _ => AppError::InternalErr,
             },
 
@@ -95,8 +95,17 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
 
 impl From<sqlx::Error> for AppError {
     fn from(err: sqlx::Error) -> Self {
-        log::debug!("From sqlx err: {:?}", err);
-        AppError::InternalErr
+        let mut app_err = AppError::Ignorable;
+        log::debug!("From<sqlx:Error> err: {:?}", err);
+        if let Some(db_err) = err.as_database_error() {
+            log::debug!("From<sqlx::Error> db_err: {:?}", db_err);
+            if let Some(code) = db_err.code() {
+                match code {
+                    _ => app_err = AppError::InternalErr,
+                }
+            }
+        }
+        app_err
     }
 }
 

@@ -10,6 +10,12 @@ impl UserId {
     }
 }
 
+impl Default for UserId {
+    fn default() -> Self {
+        Self(Default::default())
+    }
+}
+
 impl From<i64> for UserId {
     fn from(id: i64) -> Self {
         UserId(id)
