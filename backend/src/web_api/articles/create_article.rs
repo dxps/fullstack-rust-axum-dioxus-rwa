@@ -1,6 +1,6 @@
 use crate::{
     domain::model::UserId,
-    web_api::{extractors::InputJson, respond_internal_server_error, respond_unauthorized},
+    web_api::{extractors::InputJson, respond_bad_request, respond_internal_server_error},
     AppError, AppState,
 };
 use axum::{extract::State, http::StatusCode, Json};
@@ -46,7 +46,7 @@ pub async fn create_article(
             })),
         ),
         Err(err) => match err {
-            AppError::AuthUnauthorized => respond_unauthorized(err),
+            AppError::AlreadyExists(_) => respond_bad_request(err),
             _ => respond_internal_server_error(err),
         },
     }

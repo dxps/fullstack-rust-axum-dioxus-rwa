@@ -57,16 +57,12 @@ impl ArticlesMgr {
             tag_list,
             author_id.as_value(),
         );
-        match self.articles_repo.add(&mut a).await {
-            Ok(()) => {
-                a.author = self
-                    .user_repo
-                    .get_profile_by_id(author_id.as_value())
-                    .await?;
-                Ok(a)
-            }
-            Err(err) => Err(AppError::from(err)),
-        }
+        self.articles_repo.add(&mut a).await?;
+        a.author = self
+            .user_repo
+            .get_profile_by_id(author_id.as_value())
+            .await?;
+        Ok(a)
     }
 
     pub async fn delete_article(&self, slug: String) -> Result<(), AppError> {
