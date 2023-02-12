@@ -1,5 +1,5 @@
 use crate::{
-    domain::model::Article,
+    domain::model::{Article, UserId},
     repos::{ArticlesRepo, UsersRepo},
     AppError,
 };
@@ -45,14 +45,24 @@ impl ArticlesMgr {
         description: String,
         body: String,
         tag_list: Vec<String>,
-        author_id: i64,
+        author_id: UserId,
     ) -> Result<Article, AppError> {
         //
         let slug = slugify(&title);
-        let mut a = Article::new_basic(slug, title, description, body, tag_list, author_id);
+        let mut a = Article::new_basic(
+            slug,
+            title,
+            description,
+            body,
+            tag_list,
+            author_id.as_value(),
+        );
         match self.articles_repo.add(&mut a).await {
             Ok(()) => {
-                a.author = self.user_repo.get_profile_by_id(author_id).await?;
+                a.author = self
+                    .user_repo
+                    .get_profile_by_id(author_id.as_value())
+                    .await?;
                 Ok(a)
             }
             Err(err) => Err(AppError::from(err)),

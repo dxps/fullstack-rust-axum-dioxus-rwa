@@ -1,5 +1,5 @@
 use crate::{
-    token::Claims,
+    domain::model::UserId,
     web_api::{extractors::InputJson, respond_internal_server_error, respond_unauthorized},
     AppError, AppState,
 };
@@ -24,7 +24,7 @@ pub struct CreateArticleInputArticleKey {
 
 pub async fn create_article(
     State(state): State<Arc<AppState>>,
-    user_claims: Claims,
+    user_id: UserId,
     InputJson(input): InputJson<CreateArticleInput>,
 ) -> (StatusCode, Json<Value>) {
     //
@@ -35,7 +35,7 @@ pub async fn create_article(
             input.article.description,
             input.article.body,
             input.article.tag_list,
-            user_claims.sub,
+            user_id,
         )
         .await
     {
