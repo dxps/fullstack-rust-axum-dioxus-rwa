@@ -12,7 +12,6 @@ use axum::{
 };
 use serde::Deserialize;
 use serde_json::{json, Value};
-use std::sync::Arc;
 
 #[derive(Debug, Deserialize)]
 pub struct UpdateArticleInputDTO {
@@ -20,7 +19,7 @@ pub struct UpdateArticleInputDTO {
 }
 
 pub async fn update_article(
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
     _: UserId,
     Path(slug): Path<String>,
     Json(input): Json<UpdateArticleInputDTO>,

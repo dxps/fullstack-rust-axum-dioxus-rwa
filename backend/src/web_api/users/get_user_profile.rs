@@ -11,10 +11,9 @@ use axum::{
     Json,
 };
 use serde_json::{json, Value};
-use std::sync::Arc;
 
 pub async fn get_user_profile(
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
     curr_user_id: UserId,
     Path(username): Path<String>,
 ) -> (StatusCode, Json<Value>) {

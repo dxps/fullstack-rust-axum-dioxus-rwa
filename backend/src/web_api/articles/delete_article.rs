@@ -9,10 +9,9 @@ use axum::{
     Json,
 };
 use serde_json::Value;
-use std::sync::Arc;
 
 pub async fn delete_article(
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
     _: UserId,
     Path(slug): Path<String>,
 ) -> (StatusCode, Json<Value>) {

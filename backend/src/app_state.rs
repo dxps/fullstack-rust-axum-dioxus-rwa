@@ -7,7 +7,7 @@ use axum::extract::FromRef;
 use std::sync::Arc;
 
 /// The (global) state of the app.
-#[derive(FromRef)]
+#[derive(Clone, FromRef)]
 pub struct AppState {
     pub dbcp: Arc<DbConnPool>,
     pub user_repo: Arc<UsersRepo>,

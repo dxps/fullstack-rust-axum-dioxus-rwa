@@ -6,10 +6,9 @@ use crate::{
 };
 use axum::{extract::State, http::StatusCode, Json};
 use serde_json::Value;
-use std::sync::Arc;
 
 pub async fn get_current_user(
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
     curr_user_id: UserId,
 ) -> (StatusCode, Json<Value>) {
     match state

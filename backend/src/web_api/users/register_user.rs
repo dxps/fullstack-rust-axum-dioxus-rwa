@@ -9,7 +9,6 @@ use crate::{
 use axum::{extract::State, http::StatusCode};
 use serde::Deserialize;
 use serde_json::Value;
-use std::sync::Arc;
 
 #[derive(Debug, Deserialize)]
 pub struct RegisterUserInput {
@@ -36,7 +35,7 @@ pub struct RegisterUserInputUserKey {
 }
 
 pub async fn register_user(
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
     InputJson(input): InputJson<RegisterUserInput>,
 ) -> (StatusCode, axum::Json<Value>) {
     let pwd = input.user.password.clone();

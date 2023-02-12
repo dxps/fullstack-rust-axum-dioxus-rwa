@@ -13,10 +13,9 @@ use axum::{
     Json,
 };
 use serde_json::{json, Value};
-use std::sync::Arc;
 
 pub async fn follow_user(
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
     Path(username): Path<String>,
     curr_user_id: UserId,
 ) -> (StatusCode, Json<Value>) {
@@ -42,7 +41,7 @@ pub async fn follow_user(
 pub async fn unfollow_user(
     Path(username): Path<String>,
     user_claims: Claims,
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
 ) -> (StatusCode, Json<Value>) {
     let curr_user_id = UserId::from(user_claims.sub);
     let profile = state

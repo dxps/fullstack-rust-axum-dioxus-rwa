@@ -21,7 +21,6 @@ use std::{
     net::{IpAddr, Ipv6Addr, SocketAddr},
     process::exit,
     str::FromStr,
-    sync::Arc,
 };
 use tokio::signal::{self, unix::SignalKind};
 use tower_http::{
@@ -101,11 +100,12 @@ fn routes(state: AppState, assets_dir: String) -> Router {
         )
         .layer(tracing_layer)
         .layer(cors_layer)
-        .with_state(Arc::new(state))
+        // .with_state(Arc::new(state))
+        .with_state(state)
         .merge(SpaRouter::new("/assets", assets_dir))
 }
 
-async fn health_check(State(state): State<Arc<AppState>>) -> impl IntoResponse {
+async fn health_check(State(state): State<AppState>) -> impl IntoResponse {
     match ping_db(&state.dbcp).await {
         true => Json(json!({ "database": "ok" })),
         false => Json(json!({ "database": "err" })),

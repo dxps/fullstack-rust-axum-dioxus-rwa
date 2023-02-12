@@ -10,7 +10,6 @@ use crate::{
 use axum::{extract::State, http::StatusCode, Json};
 use serde::Deserialize;
 use serde_json::Value;
-use std::sync::Arc;
 
 #[derive(Debug, Deserialize)]
 pub struct UpdateUserInputDTO {
@@ -25,7 +24,7 @@ pub struct UpdateUserInputDTOUserAttrs {
 }
 
 pub async fn update_current_user(
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
     user_id: UserId,
     InputJson(input): InputJson<UpdateUserInputDTO>,
 ) -> (StatusCode, Json<Value>) {

@@ -7,7 +7,6 @@ use crate::{
 };
 use axum::{extract::State, response::IntoResponse};
 use serde::Deserialize;
-use std::sync::Arc;
 
 #[derive(Debug, Deserialize)]
 pub struct LoginUserInput {
@@ -22,7 +21,7 @@ pub struct LoginUserInputUserKey {
 
 // #[axum_macros::debug_handler]
 pub async fn login_user(
-    State(state): State<Arc<AppState>>,
+    State(state): State<AppState>,
     InputJson(input): InputJson<LoginUserInput>,
 ) -> impl IntoResponse {
     match state

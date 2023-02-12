@@ -1,9 +1,8 @@
 use crate::{web_api::respond_internal_server_error, AppState};
 use axum::{extract::State, http::StatusCode, Json};
 use serde_json::{json, Value};
-use std::sync::Arc;
 
-pub async fn get_articles(State(state): State<Arc<AppState>>) -> (StatusCode, Json<Value>) {
+pub async fn get_articles(State(state): State<AppState>) -> (StatusCode, Json<Value>) {
     match state.articles_mgr.get_articles().await {
         Ok(articles) => (
             StatusCode::OK,
