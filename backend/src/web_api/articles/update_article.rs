@@ -20,19 +20,25 @@ pub struct UpdateArticleInputDTO {
 
 pub async fn update_article(
     State(state): State<AppState>,
-    _: UserId,
+    curr_user_id: UserId,
     Path(slug): Path<String>,
     Json(input): Json<UpdateArticleInputDTO>,
 ) -> (StatusCode, Json<Value>) {
     //
-    match state.articles_mgr.update_article(slug, input.article).await {
+    match state
+        .articles_mgr
+        .update_article(curr_user_id, slug, input.article)
+        .await
+    {
         Ok(article) => (StatusCode::OK, Json(json!({ "article": article }))),
         Err(err) => {
             log::debug!("update_article > err: {}", err);
             match err {
                 AppError::AuthUnauthorized => respond_unauthorized(err),
                 AppError::AuthInvalidTokenErr(_) => respond_unauthorized(err),
-                AppError::AuthInvalidInput => respond_bad_request(err),
+                AppError::AuthInvalidInput | AppError::InvalidRequest(_) => {
+                    respond_bad_request(err)
+                }
                 AppError::NotFound(_) => respond_not_found(err),
                 _ => respond_internal_server_error(err),
             }

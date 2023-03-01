@@ -64,7 +64,7 @@ impl ArticlesRepo {
         res
     }
 
-    pub async fn get_article(&self, slug: String) -> Result<Option<Article>, AppError> {
+    pub async fn get_article(&self, slug: &String) -> Result<Option<Article>, AppError> {
         //
         let conn = self.dbcp.as_ref();
         let mut article = sqlx::query(

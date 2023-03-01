@@ -35,7 +35,7 @@ impl ArticlesMgr {
         self.articles_repo.get_articles().await
     }
 
-    pub async fn get_article(&self, slug: String) -> Result<Option<Article>, AppError> {
+    pub async fn get_article(&self, slug: &String) -> Result<Option<Article>, AppError> {
         self.articles_repo.get_article(slug).await
     }
 
@@ -65,23 +65,47 @@ impl ArticlesMgr {
         Ok(a)
     }
 
-    pub async fn delete_article(&self, slug: String) -> Result<(), AppError> {
+    pub async fn delete_article(&self, curr_user_id: UserId, slug: String) -> Result<(), AppError> {
         //
-        self.articles_repo.delete(slug).await
+        match self.get_article(&slug).await {
+            Ok(a) => match a {
+                Some(a) => {
+                    if a.author.user_id != curr_user_id.as_value() {
+                        return Err(AppError::InvalidRequest(
+                            "only the author of an article can delete it".into(),
+                        ));
+                    }
+                    self.articles_repo.delete(slug).await
+                }
+                None => Err(AppError::NotFound("article".into())),
+            },
+            Err(err) => {
+                log::error!("Failed to delete an article: {err}");
+                Err(AppError::InternalErr)
+            }
+        }
     }
 
     pub async fn update_article(
         &self,
+        curr_user_id: UserId,
         slug: String,
         input: UpdateArticleInput,
     ) -> Result<Article, AppError> {
         //
         log::debug!("update_article >> input={:?}", input);
-        let res = self.get_article(slug).await?;
+        let res = self.get_article(&slug).await?;
         if res.is_none() {
             return Err(AppError::NotFound("article".into()));
         }
         let mut a = res.unwrap();
+
+        // Only the author can update it.
+        if a.author.user_id != curr_user_id.as_value() {
+            return Err(AppError::InvalidRequest(
+                "only the author of an article can update it".into(),
+            ));
+        }
 
         // Fill-in any of the input's elements.
         if let Some(title) = input.title {
