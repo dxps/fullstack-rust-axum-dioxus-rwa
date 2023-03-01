@@ -82,6 +82,14 @@ impl UsersRepo {
                 _ => return Err(AppError::InternalErr),
             },
         };
+
+        // A user cannot follow himself.
+        if curr_user_id.as_value() == followed_user_id.as_value() {
+            return Err(AppError::InvalidRequest(
+                "you cannot follow yourself".into(),
+            ));
+        }
+
         match sqlx::query("INSERT INTO followings VALUES($1, $2)")
             .bind(curr_user_id.as_value())
             .bind(followed_user_id.as_value())

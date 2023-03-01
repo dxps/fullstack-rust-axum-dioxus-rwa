@@ -318,5 +318,24 @@
     ],
     "params": [],
     "tests": []
+  },
+  {
+    "_id": "8816d4d7-1a0a-468c-a648-305438f91978",
+    "colId": "92cb7d9f-265b-4d48-9d3d-de9520c08691",
+    "containerId": "",
+    "name": "Follow Profile (joe)",
+    "url": "{{API_URL}}/profiles/joe/follow",
+    "method": "POST",
+    "sortNum": 50000,
+    "created": "2023-03-01T17:41:36.416Z",
+    "modified": "2023-03-01T17:41:54.737Z",
+    "headers": [
+      {
+        "name": "Authorization",
+        "value": "Token {{access_token}}"
+      }
+    ],
+    "params": [],
+    "tests": []
   }
 ]

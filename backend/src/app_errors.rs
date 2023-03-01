@@ -39,6 +39,9 @@ pub enum AppError {
     #[error("invalid input")]
     AuthInvalidInput,
 
+    #[error("invalid request: {0}")]
+    InvalidRequest(String),
+
     #[error("{0} not found")]
     NotFound(String),
 

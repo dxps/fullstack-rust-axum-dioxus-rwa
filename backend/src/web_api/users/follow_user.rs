@@ -21,9 +21,7 @@ pub async fn follow_user(
 ) -> (StatusCode, Json<Value>) {
     //
 
-    let profile = state.user_repo.follow_user(&curr_user_id, &username).await;
-
-    match profile {
+    match state.user_repo.follow_user(&curr_user_id, &username).await {
         Ok(profile) => (StatusCode::OK, Json(json!({ "profile": profile }))),
         Err(err) => match err {
             AppError::Ignorable => {
@@ -31,6 +29,7 @@ pub async fn follow_user(
             }
             AppError::NotFound(_) => respond_not_found(err),
             AppError::AuthInvalidInput => respond_bad_request(err),
+            AppError::InvalidRequest(_) => respond_bad_request(err),
             AppError::AuthUnauthorized => respond_unauthorized(err),
             AppError::AuthInvalidTokenErr(_) => respond_unauthorized(err),
             _ => respond_internal_server_error(err),
