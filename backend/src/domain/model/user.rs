@@ -46,8 +46,7 @@ impl Into<User> for UserEntry {
     }
 }
 
-/// A common and concise representation of a `User`,
-/// included into various use cases responses.
+/// A common representation of a `User`, presented in multiple use cases.
 #[derive(Clone, Debug, Serialize)]
 pub struct UserProfile {
     #[serde(skip_serializing)]

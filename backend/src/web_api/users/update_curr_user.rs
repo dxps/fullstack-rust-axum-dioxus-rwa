@@ -28,6 +28,7 @@ pub async fn update_current_user(
     user_id: UserId,
     InputJson(input): InputJson<UpdateUserInputDTO>,
 ) -> (StatusCode, Json<Value>) {
+    //
     match state
         .user_repo
         .update_by_id(user_id, input.user.email, input.user.bio, input.user.image)

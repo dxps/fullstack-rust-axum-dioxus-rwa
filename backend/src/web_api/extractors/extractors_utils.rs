@@ -4,7 +4,7 @@ use crate::{
 };
 use axum::{extract::FromRequestParts, headers::Authorization, http::request::Parts, TypedHeader};
 
-// It extracts the token - if it exists - from the Authorization (HTTP request) header having the value of "Bearer <token>".
+// It extracts the token - if it exists - from the Authorization (HTTP request) header having the value of "Token <token>".
 pub async fn validate_token_extract_claims<S: Send + Sync>(
     parts: &mut Parts,
     state: &S,

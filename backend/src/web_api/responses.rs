@@ -60,6 +60,7 @@ where
 // Implementation of Axum's `IntoResponse` trait, so that an `AppError` can be converted into an HTTP response.
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
+        //
         let body = axum::Json(json!({
             "error": self.to_string()
         }));

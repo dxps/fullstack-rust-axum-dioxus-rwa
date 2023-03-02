@@ -20,7 +20,6 @@ pub async fn follow_user(
     curr_user_id: UserId,
 ) -> (StatusCode, Json<Value>) {
     //
-
     match state.user_repo.follow_user(&curr_user_id, &username).await {
         Ok(profile) => (StatusCode::OK, Json(json!({ "profile": profile }))),
         Err(err) => match err {
@@ -42,6 +41,7 @@ pub async fn unfollow_user(
     user_claims: Claims,
     State(state): State<AppState>,
 ) -> (StatusCode, Json<Value>) {
+    //
     let curr_user_id = UserId::from(user_claims.sub);
     let profile = state
         .user_repo

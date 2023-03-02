@@ -7,12 +7,11 @@ pub struct AuthMgr {
 }
 
 impl AuthMgr {
-    /// Create a new instance of `AuthMgr`.
+    //
     pub fn new(user_repo: Arc<UsersRepo>) -> Self {
         Self { user_repo }
     }
 
-    /// Register a new `User`.
     pub async fn register_user(&self, user: &User, pwd: String) -> Result<i64, AppError> {
         let (pwd, salt) = Self::generate_password(pwd.into());
         match self.user_repo.save(&user, pwd, salt).await {
@@ -31,7 +30,6 @@ impl AuthMgr {
         }
     }
 
-    /// Login a `User`.
     pub async fn login_user(&self, email: String, pwd: String) -> Result<User, AppError> {
         match self
             .user_repo
@@ -45,7 +43,7 @@ impl AuthMgr {
                         Ok(user_entry.into())
                     }
                     false => {
-                        log::debug!("Wrong login credentials for email {:?}", email);
+                        log::debug!("Wrong credentials for email {:?}", email);
                         Err(AppError::AuthLoginFailed)
                     }
                 }

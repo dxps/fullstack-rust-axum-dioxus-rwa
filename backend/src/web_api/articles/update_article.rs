@@ -32,7 +32,7 @@ pub async fn update_article(
     {
         Ok(article) => (StatusCode::OK, Json(json!({ "article": article }))),
         Err(err) => {
-            log::debug!("update_article > err: {}", err);
+            log::error!("Failed to update article: {}", err);
             match err {
                 AppError::AuthUnauthorized => respond_unauthorized(err),
                 AppError::AuthInvalidTokenErr(_) => respond_unauthorized(err),

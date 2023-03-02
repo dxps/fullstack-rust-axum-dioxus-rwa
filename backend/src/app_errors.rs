@@ -53,10 +53,11 @@ pub enum AppError {
 }
 
 impl From<(sqlx::Error, AppUseCase)> for AppError {
+    //
     fn from(ctx: (sqlx::Error, AppUseCase)) -> Self {
-        log::debug!("From (sqlx err, case): {:?}", ctx);
+        log::debug!("from((sqlx::Error, AppUseCase)): ctx={:?}", ctx);
         let err = ctx.0;
-        // Considering the use case first, then the possible errors within.
+        // Start with the use case as the context, and then cover the possible errors within.
         match ctx.1 {
             AppUseCase::UserRegister => match &err.into_database_error() {
                 Some(e) => match e.code() {
@@ -97,22 +98,20 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
 }
 
 impl From<sqlx::Error> for AppError {
+    //
     fn from(err: sqlx::Error) -> Self {
         let mut app_err = AppError::Ignorable;
-        log::debug!("From<sqlx:Error> err: {:?}", err);
-        if let Some(db_err) = err.as_database_error() {
-            log::debug!("From<sqlx::Error> db_err: {:?}", db_err);
-            if let Some(code) = db_err.code() {
-                match code {
-                    _ => app_err = AppError::InternalErr,
-                }
-            }
+        log::debug!("from(sqlx:Error): err={:?}", err);
+        if let Some(_) = err.as_database_error() {
+            // For now, any db error is classified as internal error.
+            app_err = AppError::InternalErr
         }
         app_err
     }
 }
 
 impl From<jsonwebtoken::errors::Error> for AppError {
+    //
     fn from(err: jsonwebtoken::errors::Error) -> Self {
         AppError::AuthInvalidTokenErr(err.to_string())
     }

@@ -12,11 +12,13 @@ pub struct UsersRepo {
 }
 
 impl UsersRepo {
+    //
     pub fn new(dbcp: Arc<DbConnPool>) -> Self {
         Self { dbcp }
     }
 
     pub async fn save(&self, user: &User, pwd: String, salt: String) -> Result<i64, AppError> {
+        //
         match sqlx::query(
             "INSERT INTO accounts(email, username, password, salt) VALUES ($1, $2, $3, $4) RETURNING id",
         )
@@ -37,6 +39,7 @@ impl UsersRepo {
         email: &String,
         usecase: AppUseCase,
     ) -> Result<UserEntry, AppError> {
+        //
         let entry = sqlx::query_as::<_, UserEntry>(
             "SELECT id, email, username, password, salt, bio, image FROM accounts WHERE email = $1",
         )
@@ -50,6 +53,7 @@ impl UsersRepo {
     }
 
     pub async fn get_by_id(&self, id: &UserId, usecase: AppUseCase) -> Result<UserEntry, AppError> {
+        //
         let entry = sqlx::query_as::<_, UserEntry>(
             "SELECT email, username, password, salt, bio, image FROM accounts WHERE id = $1",
         )
@@ -67,7 +71,7 @@ impl UsersRepo {
         curr_user_id: &UserId,
         followed_username: &String,
     ) -> Result<UserProfile, AppError> {
-        // First, get the followed user_id.
+        //
         let followed_user_id: UserId;
         match sqlx::query_as::<_, UserId>("SELECT id FROM accounts WHERE username = $1")
             .bind(followed_username)
@@ -77,16 +81,15 @@ impl UsersRepo {
             Ok(id) => followed_user_id = id,
             Err(err) => match err {
                 sqlx::Error::RowNotFound => {
-                    return Err(AppError::NotFound("followed username".into()))
+                    return Err(AppError::NotFound("followed username was not found".into()))
                 }
                 _ => return Err(AppError::InternalErr),
             },
         };
 
-        // A user cannot follow himself.
         if curr_user_id.as_value() == followed_user_id.as_value() {
             return Err(AppError::InvalidRequest(
-                "you cannot follow yourself".into(),
+                "a user cannot follow himself".into(),
             ));
         }
 
@@ -113,7 +116,7 @@ impl UsersRepo {
         curr_user_id: &UserId,
         followed_username: &String,
     ) -> Result<UserProfile, AppError> {
-        // First, get the followed user_id.
+        //
         let followed_user_id =
             sqlx::query_as::<_, UserId>("SELECT id FROM accounts WHERE username = $1")
                 .bind(followed_username)

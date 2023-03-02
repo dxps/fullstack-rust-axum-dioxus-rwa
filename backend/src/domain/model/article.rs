@@ -2,7 +2,7 @@ use super::UserProfile;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 
-/// `Article` domain model is what a User can read or write.
+/// `Article` domain model is what a `User` can read or write.
 #[derive(Clone, Debug, Serialize)]
 pub struct Article {
     #[serde(skip_serializing)]
@@ -20,6 +20,7 @@ pub struct Article {
 }
 
 impl Article {
+    //
     pub fn new(
         id: i64,
         slug: String,

@@ -23,7 +23,8 @@ pub struct UpdateArticleInput {
 }
 
 impl ArticlesMgr {
-    /// Create a new instance of `ArticlesMgr`.
+    //
+
     pub fn new(articles_repo: ArticlesRepo, user_repo: Arc<UsersRepo>) -> Self {
         Self {
             articles_repo,
@@ -93,7 +94,6 @@ impl ArticlesMgr {
         input: UpdateArticleInput,
     ) -> Result<Article, AppError> {
         //
-        log::debug!("update_article >> input={:?}", input);
         let res = self.get_article(&slug).await?;
         if res.is_none() {
             return Err(AppError::NotFound("article".into()));
@@ -107,7 +107,7 @@ impl ArticlesMgr {
             ));
         }
 
-        // Fill-in any of the input's elements.
+        // Update it with any of the input's elements.
         if let Some(title) = input.title {
             a.title = title;
         }
@@ -121,6 +121,7 @@ impl ArticlesMgr {
             a.tag_list = tag_list;
         }
 
+        // Finally, persist the changes.
         self.articles_repo.update(&mut a).await.map(|_| a)
     }
 }

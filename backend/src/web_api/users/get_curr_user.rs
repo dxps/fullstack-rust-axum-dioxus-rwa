@@ -11,6 +11,7 @@ pub async fn get_current_user(
     State(state): State<AppState>,
     curr_user_id: UserId,
 ) -> (StatusCode, Json<Value>) {
+    //
     match state
         .user_repo
         .get_by_id(&curr_user_id, AppUseCase::AnyTokenProtectedOperation)

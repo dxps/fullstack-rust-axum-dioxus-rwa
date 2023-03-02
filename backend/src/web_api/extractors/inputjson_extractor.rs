@@ -8,7 +8,8 @@ use axum::{
 use serde_json::{json, Value};
 use std::error::Error;
 
-// This extractor provides a better API response based on the error that `axum::Json` could return.
+/// This extractor provides an expected JSON based API response
+/// with the error that `axum::Json` could potentially return.
 pub struct InputJson<T>(pub T);
 
 // ----------------------------------------------------------------------------

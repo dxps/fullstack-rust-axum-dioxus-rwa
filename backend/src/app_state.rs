@@ -16,6 +16,7 @@ pub struct AppState {
 }
 
 impl AppState {
+    //
     pub fn new(dbcp: DbConnPool) -> Self {
         let dbcp = Arc::new(dbcp);
         let user_repo = Arc::new(UsersRepo::new(dbcp.clone()));

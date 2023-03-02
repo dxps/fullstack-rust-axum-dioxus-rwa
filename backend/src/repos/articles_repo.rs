@@ -3,7 +3,6 @@ use crate::{
     domain::model::{Article, UserProfile},
     AppError,
 };
-
 use sqlx::{postgres::PgRow, Pool, Postgres, Row, Transaction};
 use std::sync::Arc;
 
@@ -14,6 +13,7 @@ pub struct ArticlesRepo {
 }
 
 impl ArticlesRepo {
+    //
     pub fn new(dbcp: Arc<DbConnPool>) -> Self {
         Self { dbcp }
     }
@@ -223,7 +223,6 @@ impl ArticlesRepo {
                 return Err(err);
             }
         }
-
         for tag in tag_list {
             if let Err(err) =
                 sqlx::query("INSERT INTO tags_articles(tag, article_id) VALUES ($1, $2)")
@@ -241,6 +240,7 @@ impl ArticlesRepo {
     }
 
     fn render_app_error(from_db_err: sqlx::Error, slug: &String) -> AppError {
+        //
         let mut res_err = AppError::Ignorable;
         if let Some(e) = from_db_err.as_database_error() {
             if let Some(code) = e.code() {

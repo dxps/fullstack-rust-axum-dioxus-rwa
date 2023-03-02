@@ -18,7 +18,6 @@ impl Claims {
     pub fn new(id: i64, email: String, username: String) -> Self {
         let iat = Utc::now();
         let exp = iat + Duration::minutes(5);
-
         Self {
             sub: id,
             iat: iat.timestamp(),
@@ -31,6 +30,7 @@ impl Claims {
 
 /// Create a signed JWT token.
 pub fn create_jwt(id: i64, email: String, username: String) -> Result<String> {
+    //
     Ok(jsonwebtoken::encode(
         &Header::default(),
         &Claims::new(id, email, username),
@@ -40,6 +40,7 @@ pub fn create_jwt(id: i64, email: String, username: String) -> Result<String> {
 
 /// Verify the provided JWT token.
 pub fn verify_jwt(token: &str) -> Result<Claims> {
+    //
     let claims: Claims = jsonwebtoken::decode(
         token,
         &DecodingKey::from_secret("TODO_JWT_SECRET_AS_CONFIG".as_bytes()),

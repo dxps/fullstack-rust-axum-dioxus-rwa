@@ -17,6 +17,7 @@ pub async fn get_user_profile(
     curr_user_id: UserId,
     Path(username): Path<String>,
 ) -> (StatusCode, Json<Value>) {
+    //
     let profile = state
         .user_repo
         .get_profile_by_username(&curr_user_id, &username, AppUseCase::GetUserProfile)

@@ -16,6 +16,7 @@ pub struct RegisterUserInput {
 }
 
 impl Into<User> for RegisterUserInput {
+    //
     fn into(self) -> User {
         User {
             id: 0, // not relevant
@@ -38,6 +39,7 @@ pub async fn register_user(
     State(state): State<AppState>,
     InputJson(input): InputJson<RegisterUserInput>,
 ) -> (StatusCode, axum::Json<Value>) {
+    //
     let pwd = input.user.password.clone();
     let user: User = input.into();
     match state.auth_mgr.register_user(&user, pwd).await {
@@ -46,7 +48,7 @@ pub async fn register_user(
                 respond_with_user_dto(user.email, Some(token), user.username, "".to_string(), None)
             }
             Err(err) => {
-                log::error!("jwt creation failed: {err}");
+                log::error!("Failed to create JWT: {err}");
                 respond_internal_server_error(err)
             }
         },

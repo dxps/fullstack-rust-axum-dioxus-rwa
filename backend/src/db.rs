@@ -6,6 +6,7 @@ use std::time::Duration;
 pub type DbConnPool = sqlx::Pool<sqlx::Postgres>;
 
 pub async fn init_db_pool(cfg: &AppConfig) -> Result<DbConnPool, sqlx::Error> {
+    //
     let db_url = cfg.database.connection_string();
     let db_url = db_url.expose_secret();
     PgPoolOptions::new()
@@ -17,6 +18,7 @@ pub async fn init_db_pool(cfg: &AppConfig) -> Result<DbConnPool, sqlx::Error> {
 }
 
 pub async fn ping_db(conn: &DbConnPool) -> bool {
+    //
     let z = sqlx::query("SELECT 1").execute(conn).await;
     match z {
         Ok(_) => true,
