@@ -6,7 +6,7 @@ use crate::{
     AppError::RegistrationEmailAlreadyExists,
     AppState,
 };
-use axum::{extract::State, http::StatusCode};
+use axum::{extract::State, http::StatusCode, Json};
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -38,7 +38,7 @@ pub struct RegisterUserInputUserKey {
 pub async fn register_user(
     State(state): State<AppState>,
     InputJson(input): InputJson<RegisterUserInput>,
-) -> (StatusCode, axum::Json<Value>) {
+) -> (StatusCode, Json<Value>) {
     //
     let pwd = input.user.password.clone();
     let user: User = input.into();

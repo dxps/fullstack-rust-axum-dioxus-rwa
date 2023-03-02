@@ -3,7 +3,7 @@ use axum::{
     extract::{rejection::JsonRejection, FromRequest, MatchedPath},
     http::Request,
     http::StatusCode,
-    RequestPartsExt,
+    Json, RequestPartsExt,
 };
 use serde_json::{json, Value};
 use std::error::Error;
@@ -23,11 +23,11 @@ pub struct InputJson<T>(pub T);
 #[async_trait]
 impl<S, B, T> FromRequest<S, B> for InputJson<T>
 where
-    axum::Json<T>: FromRequest<S, B, Rejection = JsonRejection>,
+    Json<T>: FromRequest<S, B, Rejection = JsonRejection>,
     S: Send + Sync,
     B: Send + 'static,
 {
-    type Rejection = (StatusCode, axum::Json<Value>);
+    type Rejection = (StatusCode, Json<Value>);
 
     async fn from_request(req: Request<B>, state: &S) -> Result<Self, Self::Rejection> {
         let (mut parts, body) = req.into_parts();
@@ -45,7 +45,7 @@ where
 
         let req = Request::from_parts(parts, body);
 
-        match axum::Json::<T>::from_request(req, state).await {
+        match Json::<T>::from_request(req, state).await {
             Ok(value) => Ok(Self(value.0)),
             // Convert the error from `axum::Json` into whatever we want.
             Err(rejection) => {
@@ -60,7 +60,7 @@ where
                 };
                 Err((
                     code,
-                    axum::Json(json!({
+                    Json(json!({
                         "error": message,
                         "path": path,
                         "reason": reason,
