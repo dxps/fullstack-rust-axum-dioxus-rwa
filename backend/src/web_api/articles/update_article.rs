@@ -34,11 +34,8 @@ pub async fn update_article(
         Err(err) => {
             log::error!("Failed to update article: {}", err);
             match err {
-                AppError::AuthUnauthorized => respond_unauthorized(err),
-                AppError::AuthInvalidTokenErr(_) => respond_unauthorized(err),
-                AppError::AuthInvalidInput | AppError::InvalidRequest(_) => {
-                    respond_bad_request(err)
-                }
+                AppError::Unauthorized(_) => respond_unauthorized(err),
+                AppError::InvalidRequest(_) => respond_bad_request(err),
                 AppError::NotFound(_) => respond_not_found(err),
                 _ => respond_internal_server_error(err),
             }

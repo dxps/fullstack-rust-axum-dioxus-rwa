@@ -27,10 +27,8 @@ pub async fn follow_user(
                 get_user_profile(State(state), curr_user_id, Path(username)).await
             }
             AppError::NotFound(_) => respond_not_found(err),
-            AppError::AuthInvalidInput => respond_bad_request(err),
             AppError::InvalidRequest(_) => respond_bad_request(err),
-            AppError::AuthUnauthorized => respond_unauthorized(err),
-            AppError::AuthInvalidTokenErr(_) => respond_unauthorized(err),
+            AppError::Unauthorized(_) => respond_unauthorized(err),
             _ => respond_internal_server_error(err),
         },
     }
@@ -55,11 +53,8 @@ pub async fn unfollow_user(
                 get_user_profile(State(state), curr_user_id, Path(username)).await
             }
             AppError::NotFound(_) => respond_not_found(err),
-            AppError::AuthInvalidInput => respond_bad_request(err),
-            AppError::AuthUnauthorized => respond_unauthorized(err),
-            AppError::AuthInvalidTokenErr(msg) => {
-                respond_unauthorized(AppError::AuthInvalidTokenErr(msg))
-            }
+            AppError::InvalidRequest(_) => respond_bad_request(err),
+            AppError::Unauthorized(_) => respond_unauthorized(err),
             _ => respond_internal_server_error(err),
         },
     }

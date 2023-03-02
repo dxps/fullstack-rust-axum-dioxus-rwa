@@ -213,7 +213,9 @@ impl UsersRepo {
         image: Option<String>,
     ) -> Result<UserEntry, AppError> {
         if email.is_none() && bio.is_none() && image.is_none() {
-            return Err(AppError::AuthInvalidInput);
+            return Err(AppError::InvalidRequest(
+                "email, bio, and image is missing from request body".into(),
+            ));
         }
         match self.get_by_id(&id, AppUseCase::UpdateUser).await {
             Ok(mut entry) => {

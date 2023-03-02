@@ -30,15 +30,6 @@ pub enum AppError {
     #[error("wrong credentials")]
     AuthLoginFailed,
 
-    #[error("unauthorized")]
-    AuthUnauthorized,
-
-    #[error("invalid token: {0}")]
-    AuthInvalidTokenErr(String),
-
-    #[error("invalid input")]
-    AuthInvalidInput,
-
     #[error("invalid request: {0}")]
     InvalidRequest(String),
 
@@ -50,6 +41,9 @@ pub enum AppError {
 
     #[error("")]
     Ignorable,
+
+    #[error("unauthorized: {0}")]
+    Unauthorized(String),
 }
 
 impl From<(sqlx::Error, AppUseCase)> for AppError {
@@ -113,6 +107,6 @@ impl From<sqlx::Error> for AppError {
 impl From<jsonwebtoken::errors::Error> for AppError {
     //
     fn from(err: jsonwebtoken::errors::Error) -> Self {
-        AppError::AuthInvalidTokenErr(err.to_string())
+        AppError::Unauthorized(err.to_string())
     }
 }

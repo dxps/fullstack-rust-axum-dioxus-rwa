@@ -42,11 +42,8 @@ pub async fn update_current_user(
             entry.user.image,
         ),
         Err(err) => match err {
-            AppError::AuthInvalidInput => respond_bad_request(err),
-            AppError::AuthUnauthorized => respond_unauthorized(err),
-            AppError::AuthInvalidTokenErr(msg) => {
-                respond_unauthorized(AppError::AuthInvalidTokenErr(msg))
-            }
+            AppError::InvalidRequest(_) => respond_bad_request(err),
+            AppError::Unauthorized(_) => respond_unauthorized(err),
             _ => respond_internal_server_error(err),
         },
     }

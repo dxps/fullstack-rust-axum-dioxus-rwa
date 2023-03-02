@@ -19,9 +19,7 @@ pub async fn delete_article(
     match state.articles_mgr.delete_article(curr_user_id, slug).await {
         Ok(_) => (StatusCode::NO_CONTENT, Json(Value::default())),
         Err(err) => match err {
-            AppError::AuthUnauthorized | AppError::AuthInvalidTokenErr(_) => {
-                respond_unauthorized(err)
-            }
+            AppError::Unauthorized(_) => respond_unauthorized(err),
             AppError::InvalidRequest(_) => respond_bad_request(err),
             _ => respond_internal_server_error(err),
         },

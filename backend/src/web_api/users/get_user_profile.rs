@@ -26,11 +26,8 @@ pub async fn get_user_profile(
         Ok(profile) => (StatusCode::OK, Json(json!({ "profile": profile }))),
         Err(err) => match err {
             AppError::NotFound(_) => respond_not_found(err),
-            AppError::AuthInvalidInput => respond_bad_request(err),
-            AppError::AuthUnauthorized => respond_unauthorized(err),
-            AppError::AuthInvalidTokenErr(msg) => {
-                respond_unauthorized(AppError::AuthInvalidTokenErr(msg))
-            }
+            AppError::InvalidRequest(_) => respond_bad_request(err),
+            AppError::Unauthorized(_) => respond_unauthorized(err),
             _ => respond_internal_server_error(err),
         },
     }

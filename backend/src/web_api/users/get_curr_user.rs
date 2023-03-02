@@ -25,10 +25,7 @@ pub async fn get_current_user(
             entry.user.image,
         ),
         Err(err) => match err {
-            AppError::AuthUnauthorized => respond_unauthorized(err),
-            AppError::AuthInvalidTokenErr(msg) => {
-                respond_unauthorized(AppError::AuthInvalidTokenErr(msg))
-            }
+            AppError::Unauthorized(_) => respond_unauthorized(err),
             _ => respond_internal_server_error(err),
         },
     }
