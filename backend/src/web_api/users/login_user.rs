@@ -2,8 +2,7 @@ use super::responses::respond_with_user_dto;
 use crate::{
     token::create_jwt,
     web_api::{extractors::InputJson, respond_internal_server_error, respond_unauthorized},
-    AppError::AuthLoginFailed,
-    AppState,
+    AppError, AppState,
 };
 use axum::{extract::State, response::IntoResponse};
 use serde::Deserialize;
@@ -40,7 +39,7 @@ pub async fn login_user(
             }
         },
         Err(err) => match err {
-            AuthLoginFailed => respond_unauthorized(err),
+            AppError::Unauthorized(_) => respond_unauthorized(err),
             _ => respond_internal_server_error(err),
         },
     }

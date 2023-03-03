@@ -30,7 +30,7 @@ impl UsersRepo {
         .await
         {
             Ok(row) => Ok(row.get("id")),
-            Err(err) => Err(AppError::from((err, AppUseCase::UserRegister))),
+            Err(err) => Err(AppError::from((err, AppUseCase::UserRegistration))),
         }
     }
 
@@ -40,16 +40,13 @@ impl UsersRepo {
         usecase: AppUseCase,
     ) -> Result<UserEntry, AppError> {
         //
-        let entry = sqlx::query_as::<_, UserEntry>(
+        sqlx::query_as::<_, UserEntry>(
             "SELECT id, email, username, password, salt, bio, image FROM accounts WHERE email = $1",
         )
         .bind(&email)
         .fetch_one(self.dbcp.as_ref())
-        .await;
-        match entry {
-            Ok(entry) => Ok(entry),
-            Err(err) => Err(AppError::from((err, usecase))),
-        }
+        .await
+        .map_err(|err| AppError::from((err, usecase)))
     }
 
     pub async fn get_by_id(&self, id: &UserId, usecase: AppUseCase) -> Result<UserEntry, AppError> {

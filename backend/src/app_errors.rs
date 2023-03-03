@@ -9,7 +9,7 @@ use thiserror::Error;
 
 #[derive(Debug)]
 pub enum AppUseCase {
-    UserRegister,
+    UserRegistration,
     UserLogin,
     AnyTokenProtectedOperation,
     UpdateUser,
@@ -21,26 +21,21 @@ pub type Result<T> = std::result::Result<T, AppError>;
 
 #[derive(Debug, Error)]
 pub enum AppError {
+    //
     #[error("{0} already exists")]
     AlreadyExists(String),
 
-    #[error("email already exists")]
-    RegistrationEmailAlreadyExists,
+    #[error("")]
+    Ignorable,
 
-    #[error("wrong credentials")]
-    AuthLoginFailed,
+    #[error("internal error")]
+    InternalErr,
 
     #[error("invalid request: {0}")]
     InvalidRequest(String),
 
     #[error("{0} not found")]
     NotFound(String),
-
-    #[error("internal error")]
-    InternalErr,
-
-    #[error("")]
-    Ignorable,
 
     #[error("unauthorized: {0}")]
     Unauthorized(String),
@@ -53,10 +48,10 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
         let err = ctx.0;
         // Start with the use case as the context, and then cover the possible errors within.
         match ctx.1 {
-            AppUseCase::UserRegister => match &err.into_database_error() {
+            AppUseCase::UserRegistration => match &err.into_database_error() {
                 Some(e) => match e.code() {
                     Some(code) => match code.as_ref() {
-                        "23505" => AppError::RegistrationEmailAlreadyExists,
+                        "23505" => AppError::AlreadyExists("email".into()),
                         _ => AppError::InternalErr,
                     },
                     None => AppError::InternalErr,
@@ -65,7 +60,7 @@ impl From<(sqlx::Error, AppUseCase)> for AppError {
             },
 
             AppUseCase::UserLogin => match &err {
-                sqlx::Error::RowNotFound => AppError::AuthLoginFailed,
+                sqlx::Error::RowNotFound => AppError::Unauthorized("wrong credentials".into()),
                 _ => AppError::InternalErr,
             },
 

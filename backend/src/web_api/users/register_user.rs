@@ -3,7 +3,7 @@ use crate::{
     domain::model::User,
     token::create_jwt,
     web_api::{extractors::InputJson, respond_bad_request, respond_internal_server_error},
-    AppError::RegistrationEmailAlreadyExists,
+    AppError::AlreadyExists,
     AppState,
 };
 use axum::{extract::State, http::StatusCode, Json};
@@ -53,7 +53,7 @@ pub async fn register_user(
             }
         },
         Err(err) => match err {
-            RegistrationEmailAlreadyExists => respond_bad_request(err),
+            AlreadyExists(_) => respond_bad_request(err),
             _ => respond_internal_server_error(err),
         },
     }
