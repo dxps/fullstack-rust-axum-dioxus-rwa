@@ -2,6 +2,7 @@ use dioxus::{
     events::{FormData, MouseEvent},
     prelude::*,
 };
+use dioxus_router::Link;
 
 use crate::comps::{FormButton_Lg, FormInput_Lg};
 

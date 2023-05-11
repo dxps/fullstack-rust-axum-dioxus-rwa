@@ -6,6 +6,7 @@ mod pages;
 use crate::comps::{Footer, Header};
 use crate::pages::{ArticleAdd, HomePage, SettingsPage, SignInPage, SignUpPage};
 use dioxus::prelude::*;
+use dioxus_router::{Route, Router};
 use sir::{global_css, AppStyle};
 
 fn main() {
@@ -13,7 +14,7 @@ fn main() {
     wasm_logger::init(wasm_logger::Config::default());
     console_error_panic_hook::set_once();
 
-    dioxus::web::launch(App);
+    dioxus_web::launch(App);
 }
 
 fn App(cx: Scope) -> Element {
