@@ -4,7 +4,7 @@ mod comps;
 mod pages;
 
 use crate::comps::{Footer, Header};
-use crate::pages::{ArticleAdd, HomePage, SettingsPage, SignInPage, SignUpPage};
+use crate::pages::{ArticleAdd, HomePage, NotFoundPage, SettingsPage, SignInPage, SignUpPage};
 use dioxus::prelude::*;
 use dioxus_router::{Route, Router};
 use sir::{global_css, AppStyle};
@@ -29,6 +29,9 @@ fn App(cx: Scope) -> Element {
             Route { to: "/signup", SignUpPage {} }
             Route { to: "/article_add", ArticleAdd {} }
             Route { to: "/settings", SettingsPage {} }
+            // If the current location doesn't match any of the above routes,
+            // render the NotFoundPage component.
+            Route { to: "", NotFoundPage {} }
             Footer{ }
         }
     ))

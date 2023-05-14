@@ -8,6 +8,7 @@ edition = "2021"
 # dioxus = { version = "0.2.4", features = ["web", "router"] }
 dioxus = "0.3.2"
 dioxus-web = "0.3.1"
+dioxus-router = "0.3.0"
 
 log = "0.4.6"
 sir = { version = "0.3.0", features = [ "dioxus" ] }
@@ -15,4 +16,3 @@ sir = { version = "0.3.0", features = [ "dioxus" ] }
 # WebAssembly Debug
 wasm-logger = "0.2.0"
 console_error_panic_hook = "0.1.7"
-dioxus-router = "0.3.0"
