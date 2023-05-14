@@ -1,4 +1,4 @@
 #!/bin/sh
 
-dioxus serve
+dioxus serve --hot-reload
 

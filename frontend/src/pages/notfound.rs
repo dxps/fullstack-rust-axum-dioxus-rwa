@@ -1,15 +1,6 @@
-use dioxus::{
-    events::{FormData, MouseEvent},
-    prelude::*,
-};
-use dioxus_router::Link;
-
-use crate::comps::{FormButton_Lg, FormInput_Lg};
+use dioxus::prelude::*;
 
 pub fn NotFoundPage(cx: Scope) -> Element {
-    let email = use_state(&cx, String::new);
-    let password = use_state(&cx, String::new);
-
     cx.render(rsx! {
         div {
             class: "auth-page",
