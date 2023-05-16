@@ -5,10 +5,9 @@ authors = ["dxps <marius.ileana@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-# dioxus = { version = "0.2.4", features = ["web", "router"] }
 dioxus = "0.3.2"
 dioxus-web = "0.3.1"
-dioxus-router = "0.3.0"
+dioxus-router = { version = "0.3.0", features = ["web"] }
 
 log = "0.4.6"
 sir = { version = "0.3.0", features = [ "dioxus" ] }
