@@ -3,6 +3,9 @@
 mod comps;
 mod pages;
 
+use std::future::Future;
+use tokio::runtime::Handle;
+
 use crate::comps::{Footer, Header};
 use crate::pages::{ArticleAdd, HomePage, NotFoundPage, SettingsPage, SignInPage, SignUpPage};
 use dioxus::prelude::*;
@@ -35,4 +38,16 @@ fn App(cx: Scope) -> Element {
             Footer{ }
         }
     ))
+}
+
+pub(crate) fn block_on<T: Send + Sync + 'static>(
+    f: impl Future<Output = T> + Send + Sync + 'static,
+) -> T {
+    let handle = Handle::current();
+    std::thread::spawn(move || {
+        // Using Handle::block_on to run async code in the new thread.
+        handle.block_on(f)
+    })
+    .join()
+    .unwrap()
 }
