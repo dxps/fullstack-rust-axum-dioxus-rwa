@@ -5,7 +5,7 @@ use dioxus::{
     events::{FormData, MouseEvent},
     prelude::*,
 };
-use dioxus_router::{Link, Redirect};
+use dioxus_router::{use_router, Link};
 use reqwest::header::CONTENT_TYPE;
 
 use crate::comps::{FormButton_Lg, FormInput_Lg};
@@ -13,6 +13,8 @@ use crate::comps::{FormButton_Lg, FormInput_Lg};
 pub fn SignInPage(cx: Scope) -> Element {
     let email = use_state(&cx, String::new);
     let password = use_state(&cx, String::new);
+    let hide_invalid_creds = use_state(cx, String::new);
+    let router = use_router(cx);
 
     cx.render(rsx! {
         div {
@@ -36,6 +38,7 @@ pub fn SignInPage(cx: Scope) -> Element {
 
                         ul {
                             class: "error-messages",
+                            hidden: hide_invalid_creds.get().as_str(),
                             li { "Invalid credentials" }
                         }
 
@@ -53,19 +56,23 @@ pub fn SignInPage(cx: Scope) -> Element {
                                     log::info!("[SignInPage] button clicked. email: {}", email.get());
                                     let email = email.get().clone();
                                     let password = password.get().clone();
-                                    if let Some(res) = use_future!(cx, |()| async move {
-                                        login(email, password).await
-                                    }).value() {
-                                        match res {
-                                            true => {
-                                                log::info!("[SignInPage] successful login");
-                                                cx.render(rsx! { Redirect { to: "/"} });
-                                            },
-                                            false => {
-                                                log::info!("[SignInPage] failed login");
+                                    let hide_invalid_creds = hide_invalid_creds.clone();
+                                    let router = router.clone();
+                                    cx.spawn({
+                                        async move {
+                                            match login(email, password).await {
+                                                true => {
+                                                    log::info!("[SignInPage] successful login");
+                                                    router.push_route("/", None, None);
+                                                },
+                                                false => {
+                                                    log::info!("[SignInPage] failed login");
+                                                    // Show 'Invalid credentials'
+                                                    hide_invalid_creds.set("false".into());
+                                                }
                                             }
                                         }
-                                    }
+                                    });
                                 },
                                 label: "Sign in".to_string()
                             }
@@ -104,7 +111,7 @@ async fn login(email: String, password: String) -> bool {
                     true
                 }
                 401 => {
-                    log::debug!("[login] Wrong credentials");
+                    log::debug!("[login] Invalid credentials");
                     false
                 }
                 _ => {
