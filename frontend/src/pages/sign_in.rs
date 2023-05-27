@@ -5,7 +5,7 @@ use dioxus::{
     events::{FormData, MouseEvent},
     prelude::*,
 };
-use dioxus_router::Link;
+use dioxus_router::{Link, Redirect};
 use reqwest::header::CONTENT_TYPE;
 
 use crate::comps::{FormButton_Lg, FormInput_Lg};
@@ -51,10 +51,21 @@ pub fn SignInPage(cx: Scope) -> Element {
                             FormButton_Lg {
                                 onclick: |_: MouseEvent| {
                                     log::info!("[SignInPage] button clicked. email: {}", email.get());
-                                    // TODO: Call the corresponding (HTTP) API operation, and all the rest.
                                     let email = email.get().clone();
                                     let password = password.get().clone();
-                                    cx.use_hook(|| crate::block_on(login(email, password)));
+                                    if let Some(res) = use_future!(cx, |()| async move {
+                                        login(email, password).await
+                                    }).value() {
+                                        match res {
+                                            true => {
+                                                log::info!("[SignInPage] successful login");
+                                                cx.render(rsx! { Redirect { to: "/"} });
+                                            },
+                                            false => {
+                                                log::info!("[SignInPage] failed login");
+                                            }
+                                        }
+                                    }
                                 },
                                 label: "Sign in".to_string()
                             }
@@ -66,7 +77,7 @@ pub fn SignInPage(cx: Scope) -> Element {
     })
 }
 
-async fn login(email: String, password: String) {
+async fn login(email: String, password: String) -> bool {
     let mut req_creds = HashMap::new();
     req_creds.insert("email", email);
     req_creds.insert("password", password);
@@ -74,19 +85,41 @@ async fn login(email: String, password: String) {
     req_body.insert("user", req_creds);
 
     match reqwest::Client::new()
-        .post("http://localhost:8001/api/users/login")
+        .post("http://localhost:8081/api/users/login")
         .header(CONTENT_TYPE, "application/json")
         .json(&req_body)
         .send()
         .await
     {
         Ok(res) => {
-            let token = res.json::<SuccessfulLoginDTO>().await.unwrap().user.token;
-            log::info!("[login] Got token {}", token.unwrap())
-            // TODO: set it in the state
+            match res.status().as_u16() {
+                200 => {
+                    match res.json::<SuccessfulLoginDTO>().await {
+                        Ok(dto) => {
+                            log::debug!("[login] Successful login: {:#?}", dto);
+                            // TODO: set it in the state
+                        }
+                        Err(e) => log::debug!("[login] Failed to deserialize response: {}", e),
+                    }
+                    true
+                }
+                401 => {
+                    log::debug!("[login] Wrong credentials");
+                    false
+                }
+                _ => {
+                    log::debug!(
+                        "[login] Unexpected login response status: {} body: {}",
+                        res.status(),
+                        res.text().await.unwrap_or_default()
+                    );
+                    false
+                }
+            }
         }
-        Err(_err) => {
-            // log
+        Err(e) => {
+            log::error!("[login] Request failed: {}", e);
+            false
         }
     }
 }
