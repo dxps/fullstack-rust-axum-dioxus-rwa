@@ -1,5 +1,6 @@
 use axum::{
     extract::State,
+    headers::ContentType,
     response::IntoResponse,
     routing::{get, post, put},
     Json, Router,
@@ -24,7 +25,7 @@ use std::{
 };
 use tokio::signal::{self, unix::SignalKind};
 use tower_http::{
-    cors::{Any, CorsLayer},
+    cors::{AllowHeaders, Any, CorsLayer},
     trace::TraceLayer,
 };
 
@@ -81,7 +82,9 @@ async fn main() {
 
 fn routes(state: AppState, assets_dir: String) -> Router {
     let tracing_layer = TraceLayer::new_for_http();
-    let cors_layer = CorsLayer::new().allow_origin(Any);
+    let cors_layer = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_headers(AllowHeaders::any());
 
     Router::new()
         .route("/api/healthcheck", get(health_check))
