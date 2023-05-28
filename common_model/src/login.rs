@@ -10,8 +10,7 @@ pub struct SuccessfulLoginDTO {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SuccessfulLoginUserDTO {
     pub email: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub token: Option<String>,
+    pub token: String,
     pub username: String,
     pub bio: String,
     pub image: Option<String>,
