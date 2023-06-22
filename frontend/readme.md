@@ -10,6 +10,7 @@ state: `work-in-progress`
 
 1. Install [Dioxus CLI](https://github.com/DioxusLabs/cli) to be able to use `dioxus` utility command.<br/>
    Needed for doing the build and running in _dev mode_.
+   Install the git version of it (using `cargo install --git https://github.com/DioxusLabs/cli`).
 2. Run the initial build using `dioxus build`.
 
 <br/>

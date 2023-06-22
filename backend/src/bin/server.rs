@@ -1,6 +1,5 @@
 use axum::{
     extract::State,
-    headers::ContentType,
     response::IntoResponse,
     routing::{get, post, put},
     Json, Router,

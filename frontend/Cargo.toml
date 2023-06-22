@@ -20,3 +20,9 @@ wasm-logger = "0.2.0"
 console_error_panic_hook = "0.1.7"
 
 reqwest = { version="0.11.18", features = [ "blocking", "json" ] }
+
+[patch.crates-io]
+dioxus = { git = "https://github.com/DioxusLabs/dioxus.git" }
+dioxus-web = { git = "https://github.com/DioxusLabs/dioxus.git" }
+dioxus-router = { git = "https://github.com/DioxusLabs/dioxus.git", features = [ "web" ] }
+
