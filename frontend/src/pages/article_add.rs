@@ -51,7 +51,7 @@ pub fn ArticleAdd(cx: Scope) -> Element {
                             }
                             FormButton_Lg {
                                 onclick: move |_: MouseEvent| {
-                                    log::info!("[ArticleAdd] button clicked. title: {}", title);
+                                    log::info!(":: ArticleAdd] button clicked. title: {}", title);
                                     // TODO: Call the corresponding (HTTP) API operation, and all the rest.
                                 },
                                 label: "Publish Article".to_string()

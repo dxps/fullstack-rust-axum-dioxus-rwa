@@ -1,7 +1,16 @@
 use dioxus::prelude::*;
 use dioxus_router::Link;
 
+use crate::commons::AppState;
+
 pub fn Header(cx: Scope) -> Element {
+    //
+    let app_state = use_shared_state::<AppState>(cx).unwrap();
+    log::info!(":: Header :: app_state={:?}", app_state.read());
+
+    let (hide_sign_in, hide_sign_out) = get_hide_sign_in_out(app_state);
+    log::debug!(":: Header :: hide_sign_in={hide_sign_in} hide_sign_out={hide_sign_out}");
+
     cx.render(rsx! {
         nav {
             class:"navbar navbar-light",
@@ -32,8 +41,14 @@ pub fn Header(cx: Scope) -> Element {
                         }
                     }
                     li {
-                        class:"nav-item",
+                        hidden: hide_sign_in,
+                        class: "nav-item",
                         Link { class:"nav-link", to: "/signin", "Sign in" }
+                    }
+                    li {
+                        hidden: hide_sign_out,
+                        class: "nav-item",
+                        Link { class:"nav-link", to: "/signout", "Sign out" }
                     }
                     li {
                         class:"nav-item",
@@ -43,4 +58,13 @@ pub fn Header(cx: Scope) -> Element {
             }
         }
     })
+}
+
+fn get_hide_sign_in_out<'a>(state: &'a UseSharedState<AppState>) -> (&'a str, &'a str) {
+    //
+    if state.read().token.is_some() {
+        ("true", "false")
+    } else {
+        ("false", "true")
+    }
 }

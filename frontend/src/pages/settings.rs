@@ -48,7 +48,7 @@ pub fn SettingsPage(cx: Scope) -> Element {
                         }
                         FormButton_Lg {
                             onclick: move |_: MouseEvent| {
-                                log::info!("[SettingsPage] button clicked. name: {} | email: {}", name, email);
+                                log::info!(":: SettingsPage] button clicked. name: {} | email: {}", name, email);
                                 // TODO: Call the corresponding (HTTP) API operation, and all the rest. 
                             },
                             label: "Update Settings".to_string()

@@ -9,9 +9,13 @@ use dioxus_router::{use_router, Link};
 use dioxus_use_storage::use_session_storage;
 use reqwest::header::CONTENT_TYPE;
 
-use crate::comps::{FormButton_Lg, FormInput_Lg};
+use crate::{
+    commons::{AppState, TOKEN},
+    comps::{FormButton_Lg, FormInput_Lg},
+};
 
 pub fn SignInPage(cx: Scope) -> Element {
+    //
     let email = use_state(&cx, String::new);
     let password = use_state(&cx, String::new);
     let hide_invalid_creds = use_state(&cx, String::new);
@@ -21,7 +25,9 @@ pub fn SignInPage(cx: Scope) -> Element {
     let token_state = use_state(&cx, String::new);
     let token = token_state.get();
     if token.len() > 0 {
-        session_storage.insert("fs_rs_rwa", token);
+        session_storage.insert(TOKEN, token);
+        let app_state = use_shared_state::<AppState>(cx).unwrap();
+        app_state.write().token = Some(token.clone());
         router.push_route("/", None, None);
     }
 
@@ -71,11 +77,11 @@ pub fn SignInPage(cx: Scope) -> Element {
                                         async move {
                                             match login(email, password).await {
                                                 Ok(token) => {
-                                                    log::debug!("[SignInPage] Successful login.");
+                                                    log::debug!(":: SignInPage] Successful login.");
                                                     token_state.set(token);
                                                 },
                                                 Err(msg) => {
-                                                    log::debug!("[SignInPage] Failed login.");
+                                                    log::debug!(":: SignInPage] Failed login.");
                                                     match msg.as_str() {
                                                         "invalid_credentials" => {
                                                             hide_invalid_creds.set("false".into());
@@ -118,16 +124,16 @@ async fn login(email: String, password: String) -> Result<String, String> {
         Ok(res) => match res.status().as_u16() {
             200 => match res.json::<SuccessfulLoginDTO>().await {
                 Ok(dto) => {
-                    log::debug!("[login] Successful login: {:#?}", dto);
+                    log::debug!(":: login] Successful login: {:#?}", dto);
                     Ok(dto.user.token)
                 }
                 Err(e) => {
-                    log::debug!("[login] Failed to deserialize response: {}", e);
+                    log::debug!(":: login] Failed to deserialize response: {}", e);
                     Err("internal_error".into())
                 }
             },
             401 => {
-                log::debug!("[login] Invalid credentials");
+                log::debug!(":: login] Invalid credentials");
                 Err("invalid_credentials".into())
             }
             _ => {
@@ -140,7 +146,7 @@ async fn login(email: String, password: String) -> Result<String, String> {
             }
         },
         Err(e) => {
-            log::error!("[login] Request failed: {}", e);
+            log::error!(":: login] Request failed: {}", e);
             Err("internal_error".into())
         }
     }
