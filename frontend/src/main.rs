@@ -10,7 +10,7 @@ use crate::pages::{
     ArticleAdd, HomePage, NotFoundPage, SettingsPage, SignInPage, SignOutPage, SignUpPage,
 };
 use dioxus::prelude::*;
-use dioxus_router::{Route, Router};
+use dioxus_router::{Route, Router, RouterContext};
 use dioxus_use_storage::use_session_storage;
 use sir::{global_css, AppStyle};
 
@@ -35,6 +35,13 @@ fn App(cx: Scope) -> Element {
     cx.render(rsx!(
         AppStyle{ },
         Router {
+            onchange: move |router: RouterContext| {
+                if let Some(path) = router.current_location().serialized_state.as_ref() {
+                    log::debug!(":: router onchange :: current={}", path)
+                } else {
+                    log::debug!(":: router onchange :: current=None",)
+                }
+            }
             Header { }
             Route { to: "/", HomePage {} }
             Route { to: "/home", HomePage {} }
@@ -45,7 +52,7 @@ fn App(cx: Scope) -> Element {
             Route { to: "/settings", SettingsPage {} }
             // If the current location doesn't match any of the above routes,
             // render the NotFoundPage component.
-            Route { to: "", NotFoundPage {} }
+            Route { to: "/?", NotFoundPage {} }
             Footer{ }
         }
     ))

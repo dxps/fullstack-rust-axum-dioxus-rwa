@@ -1,3 +1,3 @@
 #!/bin/sh
 
-dioxus serve
+dioxus serve --port 9090

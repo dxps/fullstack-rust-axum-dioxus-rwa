@@ -31,6 +31,10 @@ pub fn SignInPage(cx: Scope) -> Element {
         router.push_route("/", None, None);
     }
 
+    // TODO: Temporary used during development.
+    let temp_email = "joe@black.com".to_string();
+    let temp_pass = "123".to_string();
+
     cx.render(rsx! {
         div {
             class: "auth-page",
@@ -61,15 +65,21 @@ pub fn SignInPage(cx: Scope) -> Element {
                             FormInput_Lg {
                                 oninput: move |s: FormData| email.set(s.value),
                                 placeholder: "Email".to_string()
+                                value: temp_email
                             }
                             FormInput_Lg {
                                 oninput: move |s: FormData| password.set(s.value),
                                 placeholder: "Password".to_string()
+                                value: temp_pass
                             }
                             FormButton_Lg {
                                 onclick: move |_: MouseEvent| {
-                                    let email = email.get().clone();
-                                    let password = password.get().clone();
+                                    // TODO: Temporary used during development.
+                                    // let email = email.get().clone();
+                                    // let password = password.get().clone();
+                                    let email = "joe@black.com".to_string();
+                                    let password = "123".to_string();
+                                    
                                     let hide_invalid_creds = hide_invalid_creds.clone();
                                     let hide_internal_err = hide_internal_err.clone();
                                     let token_state = token_state.clone();
@@ -77,11 +87,10 @@ pub fn SignInPage(cx: Scope) -> Element {
                                         async move {
                                             match login(email, password).await {
                                                 Ok(token) => {
-                                                    log::debug!(":: SignInPage] Successful login.");
                                                     token_state.set(token);
                                                 },
                                                 Err(msg) => {
-                                                    log::debug!(":: SignInPage] Failed login.");
+                                                    log::debug!(":: SignInPage :: Failed login.");
                                                     match msg.as_str() {
                                                         "invalid_credentials" => {
                                                             hide_invalid_creds.set("false".into());
@@ -123,22 +132,19 @@ async fn login(email: String, password: String) -> Result<String, String> {
     {
         Ok(res) => match res.status().as_u16() {
             200 => match res.json::<SuccessfulLoginDTO>().await {
-                Ok(dto) => {
-                    log::debug!(":: login] Successful login: {:#?}", dto);
-                    Ok(dto.user.token)
-                }
+                Ok(dto) => Ok(dto.user.token),
                 Err(e) => {
-                    log::debug!(":: login] Failed to deserialize response: {}", e);
+                    log::error!(":: login :: Failed to deserialize response: {}", e);
                     Err("internal_error".into())
                 }
             },
             401 => {
-                log::debug!(":: login] Invalid credentials");
+                log::warn!(":: login :: Invalid credentials");
                 Err("invalid_credentials".into())
             }
             _ => {
-                log::debug!(
-                    "[login] Unexpected login response status: {} body: {}",
+                log::error!(
+                    ":: login :: Unexpected login response status: {} body: {}",
                     res.status(),
                     res.text().await.unwrap_or_default()
                 );
@@ -146,7 +152,7 @@ async fn login(email: String, password: String) -> Result<String, String> {
             }
         },
         Err(e) => {
-            log::error!(":: login] Request failed: {}", e);
+            log::error!(":: login :: Request failed: {}", e);
             Err("internal_error".into())
         }
     }

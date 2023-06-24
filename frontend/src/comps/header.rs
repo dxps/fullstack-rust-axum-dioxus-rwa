@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use dioxus_router::Link;
+use dioxus_router::{use_router, Link};
 
 use crate::commons::AppState;
 
@@ -8,8 +8,8 @@ pub fn Header(cx: Scope) -> Element {
     let app_state = use_shared_state::<AppState>(cx).unwrap();
     log::info!(":: Header :: app_state={:?}", app_state.read());
 
-    let (hide_sign_in, hide_sign_out) = get_hide_sign_in_out(app_state);
-    log::debug!(":: Header :: hide_sign_in={hide_sign_in} hide_sign_out={hide_sign_out}");
+    let (signed_in, signed_out) = is_signed_in_or_not(app_state);
+    log::debug!(":: Header :: signed_in={signed_in} signed_out={signed_out}");
 
     cx.render(rsx! {
         nav {
@@ -25,6 +25,7 @@ pub fn Header(cx: Scope) -> Element {
                         Link { class:"nav-link active", to: "/", "Home" }
                     }
                     li {
+                        hidden: signed_out,
                         class:"nav-item",
                         Link {
                             class: "nav-link", to: "/article_add",
@@ -33,6 +34,7 @@ pub fn Header(cx: Scope) -> Element {
                         }
                     }
                     li {
+                        hidden: signed_out,
                         class:"nav-item",
                         Link {
                             class: "nav-link", to: "/settings",
@@ -41,16 +43,17 @@ pub fn Header(cx: Scope) -> Element {
                         }
                     }
                     li {
-                        hidden: hide_sign_in,
+                        hidden: signed_in,
                         class: "nav-item",
                         Link { class:"nav-link", to: "/signin", "Sign in" }
                     }
                     li {
-                        hidden: hide_sign_out,
+                        hidden: signed_out,
                         class: "nav-item",
                         Link { class:"nav-link", to: "/signout", "Sign out" }
                     }
                     li {
+                        hidden: signed_in,
                         class:"nav-item",
                         Link { class:"nav-link", to: "/signup", "Sign up" }
                     }
@@ -60,7 +63,7 @@ pub fn Header(cx: Scope) -> Element {
     })
 }
 
-fn get_hide_sign_in_out<'a>(state: &'a UseSharedState<AppState>) -> (&'a str, &'a str) {
+fn is_signed_in_or_not<'a>(state: UseSharedState<AppState>) -> (&'a str, &'a str) {
     //
     if state.read().token.is_some() {
         ("true", "false")
