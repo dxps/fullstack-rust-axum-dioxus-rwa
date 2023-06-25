@@ -21,8 +21,6 @@ pub fn Header(cx: Scope) -> Element {
                     class:"nav navbar-nav pull-xs-right",
                     li {
                         class:"nav-item",
-                        // todo: Add "active" class when you're on that page.
-                        // Link { class:"nav-link active", to: "/", "Home" }
                         Link { class:"nav-link", to: "/", "Home" }
                     }
                     li {

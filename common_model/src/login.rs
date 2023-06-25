@@ -6,7 +6,8 @@ pub struct SuccessfulLoginDTO {
     pub user: UserDTO,
 }
 
-/// In the payload, this must be the value of the "user" attribute.<br/>
+/// In the payload, this must be the value of the "user" attribute<br/>
+/// aka using such return `(StatusCode::OK, Json(json!({ "user": dto })))`
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserDTO {
     pub email: String,

@@ -65,12 +65,12 @@ pub fn SignInPage(cx: Scope) -> Element {
                             FormInput_Lg {
                                 oninput: move |s: FormData| email.set(s.value),
                                 placeholder: "Email".to_string()
-                                value: temp_email
+                                value: temp_email // TODO: Temporary used during development.
                             }
                             FormInput_Lg {
                                 oninput: move |s: FormData| password.set(s.value),
                                 placeholder: "Password".to_string()
-                                value: temp_pass
+                                value: temp_pass // TODO: Temporary used during development.
                             }
                             FormButton_Lg {
                                 onclick: move |_: MouseEvent| {
