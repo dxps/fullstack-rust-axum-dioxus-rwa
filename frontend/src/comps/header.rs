@@ -64,7 +64,7 @@ pub fn Header(cx: Scope) -> Element {
     })
 }
 
-fn is_signed_in_or_not<'a>(state: UseSharedState<AppState>) -> (&'a str, &'a str) {
+fn is_signed_in_or_not<'a>(state: &'a UseSharedState<AppState>) -> (&'a str, &'a str) {
     //
     if state.read().token.is_some() {
         ("true", "false")

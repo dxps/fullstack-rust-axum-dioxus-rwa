@@ -3,9 +3,6 @@
 // re-exporting their entries with a shorter path.
 //
 
-mod dtos;
-pub use dtos::*;
-
 mod follow_user;
 pub use follow_user::*;
 

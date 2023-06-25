@@ -50,8 +50,8 @@ fn App(cx: Scope) -> Element {
             Route { to: "/signup", SignUpPage {} }
             Route { to: "/article_add", ArticleAdd {} }
             Route { to: "/settings", SettingsPage {} }
-            // If the current location doesn't match any of the above routes,
-            // render the NotFoundPage component.
+            // If the current location doesn't match any of
+            // the above routes, render the NotFoundPage component.
             Route { to: "/?", NotFoundPage {} }
             Footer{ }
         }

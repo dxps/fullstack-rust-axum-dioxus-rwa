@@ -1,5 +1,5 @@
-use super::UserOutDTO;
 use axum::{http::StatusCode, Json};
+use common_model::UserDTO;
 use serde_json::{json, Value};
 
 /// Utility function for responding with `User` payload in multiple use cases.
@@ -11,7 +11,7 @@ pub fn respond_with_user_dto(
     image: Option<String>,
 ) -> (StatusCode, Json<Value>) {
     //
-    let dto = UserOutDTO {
+    let dto = UserDTO {
         email,
         token,
         username,

@@ -124,7 +124,7 @@ async fn login(email: String, password: String) -> Result<String, String> {
     req_body.insert("user", req_creds);
 
     match reqwest::Client::new()
-        .post("http://localhost:8081/api/users/login")
+        .post("http://localhost:9091/api/users/login")
         .header(CONTENT_TYPE, "application/json")
         .json(&req_body)
         .send()
@@ -132,19 +132,19 @@ async fn login(email: String, password: String) -> Result<String, String> {
     {
         Ok(res) => match res.status().as_u16() {
             200 => match res.json::<SuccessfulLoginDTO>().await {
-                Ok(dto) => Ok(dto.user.token),
+                Ok(dto) => Ok(dto.user.token.unwrap()),
                 Err(e) => {
-                    log::error!(":: login :: Failed to deserialize response: {}", e);
+                    log::error!(":: SignInPage :: login :: Failed to deserialize response: {}", e);
                     Err("internal_error".into())
                 }
             },
             401 => {
-                log::warn!(":: login :: Invalid credentials");
+                log::warn!(":: SignInPage :: login :: Invalid credentials");
                 Err("invalid_credentials".into())
             }
             _ => {
                 log::error!(
-                    ":: login :: Unexpected login response status: {} body: {}",
+                    ":: SignInPage :: login :: Unexpected login response status: {} body: {}",
                     res.status(),
                     res.text().await.unwrap_or_default()
                 );
@@ -152,7 +152,7 @@ async fn login(email: String, password: String) -> Result<String, String> {
             }
         },
         Err(e) => {
-            log::error!(":: login :: Request failed: {}", e);
+            log::error!(":: SignInPage :: login :: Request failed: {}", e);
             Err("internal_error".into())
         }
     }

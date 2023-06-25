@@ -93,14 +93,14 @@ pub fn HomePage(cx: Scope) -> Element {
                             p { "Popular Tags" }
                             div {
                                 class: "tag-list",
-                                Link { to: "", class: "tag-pil tag-default", "programming" }
-                                Link { to: "", class: "tag-pil tag-default", "javascript" }
-                                Link { to: "", class: "tag-pil tag-default", "emberjs" }
-                                Link { to: "", class: "tag-pil tag-default", "angularjs" }
-                                Link { to: "", class: "tag-pil tag-default", "react" }
-                                Link { to: "", class: "tag-pil tag-default", "mean" }
-                                Link { to: "", class: "tag-pil tag-default", "node" }
-                                Link { to: "", class: "tag-pil tag-default", "rust" }
+                                Link { to: "", class: "tag-pill tag-default", "programming" }
+                                Link { to: "", class: "tag-pill tag-default", "javascript" }
+                                Link { to: "", class: "tag-pill tag-default", "emberjs" }
+                                Link { to: "", class: "tag-pill tag-default", "angularjs" }
+                                Link { to: "", class: "tag-pill tag-default", "react" }
+                                Link { to: "", class: "tag-pill tag-default", "mean" }
+                                Link { to: "", class: "tag-pill tag-default", "node" }
+                                Link { to: "", class: "tag-pill tag-default", "rust" }
                             }
                         }
                     }
