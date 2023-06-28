@@ -1,5 +1,5 @@
 use crate::{
-    token::{verify_jwt, Claims, Token},
+    web_api::token::{verify_jwt, Claims, Token},
     AppError,
 };
 use axum::{extract::FromRequestParts, headers::Authorization, http::request::Parts, TypedHeader};

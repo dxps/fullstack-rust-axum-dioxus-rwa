@@ -6,7 +6,6 @@ use crate::{
 use sqlx::{postgres::PgRow, FromRow, Row};
 use std::sync::Arc;
 
-/// A Postgres specific implementation of `UserRepo`.
 pub struct UsersRepo {
     dbcp: Arc<DbConnPool>,
 }
@@ -20,7 +19,8 @@ impl UsersRepo {
     pub async fn save(&self, user: &User, pwd: String, salt: String) -> Result<i64, AppError> {
         //
         match sqlx::query(
-            "INSERT INTO accounts(email, username, password, salt) VALUES ($1, $2, $3, $4) RETURNING id",
+            "INSERT INTO accounts (email, username, password, salt) 
+             VALUES ($1, $2, $3, $4) RETURNING id",
         )
         .bind(&user.email)
         .bind(&user.username)
@@ -41,7 +41,8 @@ impl UsersRepo {
     ) -> Result<UserEntry, AppError> {
         //
         sqlx::query_as::<_, UserEntry>(
-            "SELECT id, email, username, password, salt, bio, image FROM accounts WHERE email = $1",
+            "SELECT id, email, username, password, salt, bio, image FROM accounts 
+             WHERE email = $1",
         )
         .bind(&email)
         .fetch_one(self.dbcp.as_ref())
@@ -52,7 +53,8 @@ impl UsersRepo {
     pub async fn get_by_id(&self, id: &UserId, usecase: AppUseCase) -> Result<UserEntry, AppError> {
         //
         let entry = sqlx::query_as::<_, UserEntry>(
-            "SELECT email, username, password, salt, bio, image FROM accounts WHERE id = $1",
+            "SELECT email, username, password, salt, bio, image FROM accounts 
+             WHERE id = $1",
         )
         .bind(id.as_value())
         .fetch_one(self.dbcp.as_ref())
@@ -143,12 +145,13 @@ impl UsersRepo {
         username: &String,
         usecase: AppUseCase,
     ) -> Result<UserProfile, AppError> {
+        //
         let mut user_id = 0_i64;
         let res = sqlx::query(
             "SELECT id, bio, image, COUNT(f.user_id) AS following FROM accounts a
-                    LEFT OUTER JOIN followings f ON f.followed_user_id = a.id AND f.user_id = $2
-                    WHERE a.username = $1
-                    GROUP BY a.id",
+             LEFT OUTER JOIN followings f ON f.followed_user_id = a.id AND f.user_id = $2
+             WHERE a.username = $1
+             GROUP BY a.id",
         )
         .bind(username)
         .bind(curr_user_id.as_value())
@@ -171,11 +174,12 @@ impl UsersRepo {
     }
 
     pub async fn get_profile_by_id(&self, user_id: i64) -> Result<UserProfile, AppError> {
+        //
         let res = sqlx::query(
             "SELECT username, bio, image, COUNT(f.user_id) AS following FROM accounts a
-                    LEFT OUTER JOIN followings f ON f.followed_user_id = a.id AND f.user_id = $1
-                    WHERE a.id = $1
-                    GROUP BY a.username, a.bio, a.image",
+             LEFT OUTER JOIN followings f ON f.followed_user_id = a.id AND f.user_id = $1
+             WHERE a.id = $1
+             GROUP BY a.username, a.bio, a.image",
         )
         .bind(user_id)
         .map(|row: PgRow| UserProfile {
@@ -194,6 +198,7 @@ impl UsersRepo {
     }
 
     async fn _get_followings(&self, user_id: i64) -> Result<Vec<UserId>, AppError> {
+        //
         let result = sqlx::query("SELECT followed_user_id FROM followings WHERE user_id = $1")
             .bind(user_id)
             .map(|row: PgRow| UserId::from(row.get::<i64, _>("followed_user_id")))
@@ -209,6 +214,7 @@ impl UsersRepo {
         bio: Option<String>,
         image: Option<String>,
     ) -> Result<UserEntry, AppError> {
+        //
         if email.is_none() && bio.is_none() && image.is_none() {
             return Err(AppError::InvalidRequest(
                 "email, bio, and image is missing from request body".into(),

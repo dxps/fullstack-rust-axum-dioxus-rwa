@@ -30,9 +30,8 @@ use tower_http::{
 
 #[tokio::main]
 async fn main() {
+    //
     let opt = Opt::parse();
-
-    // Logging init.
     if std::env::var("RUST_LOG").is_err() {
         std::env::set_var(
             "RUST_LOG",
@@ -44,10 +43,8 @@ async fn main() {
     }
     tracing_subscriber::fmt::init();
 
-    // Load the config.
     let app_cfg = get_config().expect("Failed to load the app config.");
 
-    // Init the database connection pool.
     let db_conn_pool = init_db_pool(&app_cfg)
         .await
         .expect("Failed to connect to database.");
@@ -80,6 +77,7 @@ async fn main() {
 }
 
 fn routes(state: AppState, assets_dir: String) -> Router {
+    //
     let tracing_layer = TraceLayer::new_for_http();
     let cors_layer = CorsLayer::new()
         .allow_origin(Any)
@@ -102,12 +100,12 @@ fn routes(state: AppState, assets_dir: String) -> Router {
         )
         .layer(tracing_layer)
         .layer(cors_layer)
-        // .with_state(Arc::new(state))
         .with_state(state)
         .merge(SpaRouter::new("/assets", assets_dir))
 }
 
 async fn health_check(State(state): State<AppState>) -> impl IntoResponse {
+    //
     match ping_db(&state.dbcp).await {
         true => Json(json!({ "database": "ok" })),
         false => Json(json!({ "database": "err" })),
@@ -115,6 +113,7 @@ async fn health_check(State(state): State<AppState>) -> impl IntoResponse {
 }
 
 async fn shutdown_signal() {
+    //
     let ctrl_c = async {
         signal::ctrl_c()
             .await
@@ -155,7 +154,8 @@ struct Opt {
     #[clap(short = 'l', long = "log", default_value = "info")]
     log_level: String,
 
-    /// The directory where assets (static) files are served from (for `/assets/*` requests).
+    /// The directory where assets (static) files are served from. <br/>
+    /// These assets are fetched by requests using `/assets/*` path.
     #[clap(short = 's', long = "assets-dir", default_value = "../dist")]
     assets_dir: String,
 }

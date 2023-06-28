@@ -3,6 +3,7 @@ use axum::{extract::State, http::StatusCode, Json};
 use serde_json::{json, Value};
 
 pub async fn get_articles(State(state): State<AppState>) -> (StatusCode, Json<Value>) {
+    //
     match state.articles_mgr.get_articles().await {
         Ok(articles) => (
             StatusCode::OK,

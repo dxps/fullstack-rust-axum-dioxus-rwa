@@ -22,8 +22,8 @@ impl From<i64> for UserId {
     }
 }
 
-/// The main representation of the User.<br/>
-/// It contains most of the details (except of the password).
+/// The main representation of the User. <br/>
+/// It contains most of the details (except for password).
 #[derive(Debug)]
 pub struct User {
     pub id: i64,
@@ -33,7 +33,7 @@ pub struct User {
     pub image: Option<String>,
 }
 
-/// This struct represents the whole user instance, as persisted in the database.
+/// It includes all user attributes that are persisted in the database.
 pub struct UserEntry {
     pub user: User,
     pub password: String,
@@ -46,7 +46,7 @@ impl Into<User> for UserEntry {
     }
 }
 
-/// A common representation of a `User`, presented in multiple use cases.
+/// A common representation of a `User`, used in multiple use cases.
 #[derive(Clone, Debug, Serialize)]
 pub struct UserProfile {
     #[serde(skip_serializing)]

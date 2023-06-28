@@ -1,5 +1,5 @@
 use super::validate_token_extract_claims;
-use crate::{token::Claims, AppError};
+use crate::{web_api::token::Claims, AppError};
 use axum::{async_trait, extract::FromRequestParts, http::request::Parts};
 
 #[async_trait]

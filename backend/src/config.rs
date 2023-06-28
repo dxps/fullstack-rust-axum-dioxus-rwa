@@ -17,6 +17,7 @@ pub struct DatabaseSettings {
 }
 
 impl DatabaseSettings {
+    //
     /// Get the string used for connecting to the database.
     pub fn connection_string(&self) -> Secret<String> {
         Secret::new(format!(
@@ -78,10 +79,11 @@ impl TryFrom<String> for Environment {
 
 /// Get the application config.
 pub fn get_config() -> Result<AppConfig, config::ConfigError> {
-    // In the `./config` directory we have 3 .yaml files: base, local, and production.
+    //
     let base_dir = std::env::current_dir().expect("Failed to determine the current directory");
     let config_dir = base_dir.join("config");
 
+    // In the `./config` directory we have 3 yaml files: base, local, and production.
     let base_src =
         config::File::with_name(config_dir.join("base").to_str().unwrap()).required(true);
 

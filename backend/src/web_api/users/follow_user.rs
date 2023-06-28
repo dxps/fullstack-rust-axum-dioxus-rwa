@@ -1,9 +1,8 @@
 use crate::{
     domain::model::UserId,
-    token::Claims,
     web_api::{
         get_user_profile, respond_bad_request, respond_internal_server_error, respond_not_found,
-        respond_unauthorized,
+        respond_unauthorized, token::Claims,
     },
     AppError, AppState,
 };

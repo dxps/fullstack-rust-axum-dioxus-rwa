@@ -12,6 +12,4 @@ pub mod domain;
 
 pub mod repos;
 
-pub mod token;
-
 pub mod web_api;

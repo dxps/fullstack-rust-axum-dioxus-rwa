@@ -1,8 +1,10 @@
 use super::responses::respond_with_user_dto;
 use crate::{
     domain::model::User,
-    token::create_jwt,
-    web_api::{extractors::InputJson, respond_bad_request, respond_internal_server_error},
+    web_api::{
+        extractors::InputJson, respond_bad_request, respond_internal_server_error,
+        token::create_jwt,
+    },
     AppError::AlreadyExists,
     AppState,
 };

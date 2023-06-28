@@ -24,7 +24,6 @@ pub struct UpdateArticleInput {
 
 impl ArticlesMgr {
     //
-
     pub fn new(articles_repo: ArticlesRepo, user_repo: Arc<UsersRepo>) -> Self {
         Self {
             articles_repo,
@@ -100,7 +99,6 @@ impl ArticlesMgr {
         }
         let mut a = res.unwrap();
 
-        // Only the author can update it.
         if a.author.user_id != curr_user_id.as_value() {
             return Err(AppError::InvalidRequest(
                 "only the author of an article can update it".into(),
@@ -121,7 +119,6 @@ impl ArticlesMgr {
             a.tag_list = tag_list;
         }
 
-        // Finally, persist the changes.
         self.articles_repo.update(&mut a).await.map(|_| a)
     }
 }

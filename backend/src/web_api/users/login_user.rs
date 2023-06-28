@@ -1,7 +1,9 @@
 use super::responses::respond_with_user_dto;
 use crate::{
-    token::create_jwt,
-    web_api::{extractors::InputJson, respond_internal_server_error, respond_unauthorized},
+    web_api::{
+        extractors::InputJson, respond_internal_server_error, respond_unauthorized,
+        token::create_jwt,
+    },
     AppError, AppState,
 };
 use axum::{extract::State, response::IntoResponse};

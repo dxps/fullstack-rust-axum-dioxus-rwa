@@ -6,7 +6,6 @@ use crate::{
 use sqlx::{postgres::PgRow, Pool, Postgres, Row, Transaction};
 use std::sync::Arc;
 
-/// A Postgres specific implementation of `UserRepo`.
 #[derive(Clone)]
 pub struct ArticlesRepo {
     dbcp: Arc<DbConnPool>,
@@ -22,14 +21,14 @@ impl ArticlesRepo {
         //
         let conn = self.dbcp.as_ref();
         let mut res = sqlx::query(
-            "select count(fa.user_id) as favorites_count,
+            "SELECT count(fa.user_id) AS favorites_count,
                     a.id, a.slug, a.title, a.description, a.body, a.created_at, a.updated_at,
                     u.id as user_id, u.username, u.bio, u.image, count(f.user_id) as following 
-            from articles a
-            join accounts u on a.author_id = u.id 
-            left outer join followings f on u.id = f.user_id 
-            left outer join favorited_articles fa on a.id = fa.article_id
-            group by a.id, u.id, u.username, u.bio, u.image;",
+            FROM articles a
+            JOIN accounts u on a.author_id = u.id 
+            LEFT OUTER JOIN followings f ON u.id = f.user_id 
+            LEFT OUTER JOIN favorited_articles fa ON a.id = fa.article_id
+            GROUP BY a.id, u.id, u.username, u.bio, u.image;",
         )
         .map(|r: PgRow| {
             let following = r.get::<i64, _>("following") > 0;
@@ -123,7 +122,7 @@ impl ArticlesRepo {
         let mut txn = self.dbcp.begin().await?;
 
         match sqlx::query(
-            "INSERT INTO articles(slug, title, description, body, author_id) 
+            "INSERT INTO articles (slug, title, description, body, author_id) 
             VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at",
         )
         .bind(&a.slug)
@@ -157,7 +156,6 @@ impl ArticlesRepo {
         } else {
             txn.commit().await?;
         }
-
         Ok(())
     }
 
@@ -219,23 +217,22 @@ impl ArticlesRepo {
                 .execute(&mut *txn)
                 .await
             {
-                log::error!("Error on delete tags: {}", err);
+                log::error!("Failed to delete tags: {}", err);
                 return Err(err);
             }
         }
         for tag in tag_list {
             if let Err(err) =
-                sqlx::query("INSERT INTO tags_articles(tag, article_id) VALUES ($1, $2)")
+                sqlx::query("INSERT INTO tags_articles (tag, article_id) VALUES ($1, $2)")
                     .bind(tag)
                     .bind(article_id)
                     .execute(&mut *txn)
                     .await
             {
-                log::error!("Error on insert tags: {}", err);
+                log::error!("Failed to insert tags: {}", err);
                 return Err(err);
             }
         }
-
         Ok(())
     }
 
