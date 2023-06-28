@@ -78,11 +78,7 @@ fn find_serde_json_error_source<E>(err: &E) -> Option<String>
 where
     E: Error + 'static,
 {
-    if let Some(serde_json_err) = find_error_source::<serde_json::Error>(err) {
-        Some(serde_json_err.to_string())
-    } else {
-        None
-    }
+    find_error_source::<serde_json::Error>(err).map(|serde_json_err| serde_json_err.to_string())
 }
 
 // It attempts to downcast `err` into a `T`, and if that fails,

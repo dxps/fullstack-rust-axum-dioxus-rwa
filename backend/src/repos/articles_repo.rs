@@ -52,11 +52,11 @@ impl ArticlesRepo {
         })
         .fetch_all(conn)
         .await
-        .map_err(|err| AppError::from(err));
+        .map_err(AppError::from);
 
         if let Ok(ref mut articles) = res {
-            for mut a in articles {
-                self.get_tags(conn, &mut a).await?
+            for a in articles {
+                self.get_tags(conn, a).await?
             }
         }
 
@@ -129,7 +129,7 @@ impl ArticlesRepo {
         .bind(&a.title)
         .bind(&a.description)
         .bind(&a.body)
-        .bind(&a.author.user_id)
+        .bind(a.author.user_id)
         .fetch_one(&mut txn)
         .await
         {
@@ -148,7 +148,11 @@ impl ArticlesRepo {
             }
         }
 
-        if let Err(_) = self.set_tags(&mut txn, a.id, &a.tag_list, true).await {
+        if self
+            .set_tags(&mut txn, a.id, &a.tag_list, true)
+            .await
+            .is_err()
+        {
             if let Err(err) = &mut txn.rollback().await {
                 log::error!("Txn rollback after set_tags(_) failed: {}", err);
                 return Err(AppError::InternalErr);
@@ -192,7 +196,11 @@ impl ArticlesRepo {
             return Err(res_err);
         }
 
-        if let Err(_) = self.set_tags(&mut txn, a.id, &a.tag_list, false).await {
+        if self
+            .set_tags(&mut txn, a.id, &a.tag_list, false)
+            .await
+            .is_err()
+        {
             if let Err(err) = &mut txn.rollback().await {
                 log::error!("Txn rollback failed: {}", err);
                 return Err(AppError::InternalErr);

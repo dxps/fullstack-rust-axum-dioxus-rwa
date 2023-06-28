@@ -60,9 +60,9 @@ pub fn verify_jwt(token: &str) -> Result<Claims> {
 pub struct Token(String);
 
 impl Token {
-    /// View the token part.
+    /// Get the inner token value.
     pub fn token(&self) -> &str {
-        &self.0.as_str()
+        self.0.as_str()
     }
 }
 

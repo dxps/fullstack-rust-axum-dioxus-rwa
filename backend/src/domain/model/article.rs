@@ -21,6 +21,7 @@ pub struct Article {
 
 impl Article {
     //
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         id: i64,
         slug: String,

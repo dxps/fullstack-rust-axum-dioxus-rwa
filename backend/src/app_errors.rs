@@ -91,8 +91,8 @@ impl From<sqlx::Error> for AppError {
     fn from(err: sqlx::Error) -> Self {
         let mut app_err = AppError::Ignorable;
         log::debug!("from(sqlx:Error): err={:?}", err);
-        if let Some(_) = err.as_database_error() {
-            // For now, any db error is classified as internal error.
+        if err.as_database_error().is_some() {
+            // TODO: For now, any db error is classified as internal error.
             app_err = AppError::InternalErr
         }
         app_err

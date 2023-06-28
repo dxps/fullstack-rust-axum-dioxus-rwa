@@ -1,18 +1,12 @@
 use serde::Serialize;
 
 /// The (public) id of the User.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Default)]
 pub struct UserId(i64);
 
 impl UserId {
     pub fn as_value(&self) -> i64 {
         self.0
-    }
-}
-
-impl Default for UserId {
-    fn default() -> Self {
-        Self(Default::default())
     }
 }
 
@@ -40,9 +34,15 @@ pub struct UserEntry {
     pub salt: String,
 }
 
-impl Into<User> for UserEntry {
-    fn into(self) -> User {
-        self.user
+impl From<UserEntry> for User {
+    fn from(val: UserEntry) -> Self {
+        Self {
+            id: val.user.id,
+            email: val.user.email,
+            username: val.user.username,
+            bio: val.user.bio,
+            image: val.user.image,
+        }
     }
 }
 

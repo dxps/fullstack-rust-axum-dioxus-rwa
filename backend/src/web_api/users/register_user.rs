@@ -17,14 +17,14 @@ pub struct RegisterUserInput {
     pub user: RegisterUserInputUserKey,
 }
 
-impl Into<User> for RegisterUserInput {
+impl From<RegisterUserInput> for User {
     //
-    fn into(self) -> User {
-        User {
+    fn from(val: RegisterUserInput) -> Self {
+        Self {
             id: 0, // not relevant
-            email: self.user.email,
-            username: self.user.username,
-            bio: "".to_string(),
+            email: val.user.email,
+            username: val.user.username,
+            bio: String::new(),
             image: None,
         }
     }

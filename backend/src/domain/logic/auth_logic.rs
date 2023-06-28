@@ -14,8 +14,8 @@ impl AuthMgr {
 
     pub async fn register_user(&self, user: &User, pwd: String) -> Result<i64, AppError> {
         //
-        let (pwd, salt) = Self::generate_password(pwd.into());
-        self.user_repo.save(&user, pwd, salt).await
+        let (pwd, salt) = Self::generate_password(pwd);
+        self.user_repo.save(user, pwd, salt).await
     }
 
     pub async fn login_user(&self, email: String, pwd: String) -> Result<User, AppError> {

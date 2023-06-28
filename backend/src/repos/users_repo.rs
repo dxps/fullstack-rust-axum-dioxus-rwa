@@ -44,7 +44,7 @@ impl UsersRepo {
             "SELECT id, email, username, password, salt, bio, image FROM accounts 
              WHERE email = $1",
         )
-        .bind(&email)
+        .bind(email)
         .fetch_one(self.dbcp.as_ref())
         .await
         .map_err(|err| AppError::from((err, usecase)))
@@ -222,8 +222,8 @@ impl UsersRepo {
         }
         match self.get_by_id(&id, AppUseCase::UpdateUser).await {
             Ok(mut entry) => {
-                entry.user.email = email.unwrap_or_else(|| entry.user.email);
-                entry.user.bio = bio.unwrap_or_else(|| entry.user.bio);
+                entry.user.email = email.unwrap_or(entry.user.email);
+                entry.user.bio = bio.unwrap_or(entry.user.bio);
                 entry.user.image = if image.is_some() {
                     image
                 } else {
@@ -253,6 +253,7 @@ impl UsersRepo {
 // ---------------------------------------
 
 impl FromRow<'_, PgRow> for User {
+    //
     fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
         Ok(Self {
             id: row.get("id"),
@@ -265,12 +266,14 @@ impl FromRow<'_, PgRow> for User {
 }
 
 impl FromRow<'_, PgRow> for UserId {
+    //
     fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
         Ok(UserId::from(row.get::<i64, _>("id")))
     }
 }
 
 impl FromRow<'_, PgRow> for UserEntry {
+    //
     fn from_row(row: &PgRow) -> Result<Self, sqlx::Error> {
         Ok(Self {
             user: User {
