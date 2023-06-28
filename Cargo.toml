@@ -1,2 +1,7 @@
 [workspace]
 members = [ "backend", "frontend", "common_model" ]
+
+[patch.crates-io]
+dioxus = { git = "https://github.com/DioxusLabs/dioxus.git" }
+dioxus-web = { git = "https://github.com/DioxusLabs/dioxus.git" }
+dioxus-router = { git = "https://github.com/DioxusLabs/dioxus.git"}
