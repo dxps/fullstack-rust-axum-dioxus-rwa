@@ -40,11 +40,10 @@ uuid = { version = "1.2.2", features = [ "serde", "v4" ] }
 
 
 [dependencies.sqlx]
-version = "0.6.2"
+version = "0.7.2"
 default-features = false
 features = [
     "chrono",               # Have a Postgres data type be convertible to `DateTime<Utc>`.
-    # "json",               # TBD if needed.
     "macros",               # Have access to `sqlx::query!` and `sqlx::query_as!` macros.
     "migrate",              # Ability to programmatically manage database migrations.
     "postgres",             # Use PostgreSQL specific features (such as non-standard SQL type).

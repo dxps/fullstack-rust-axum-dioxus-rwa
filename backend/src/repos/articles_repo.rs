@@ -130,7 +130,7 @@ impl ArticlesRepo {
         .bind(&a.description)
         .bind(&a.body)
         .bind(a.author.user_id)
-        .fetch_one(&mut txn)
+        .fetch_one(&mut *txn)
         .await
         {
             Ok(row) => {
@@ -185,7 +185,7 @@ impl ArticlesRepo {
         .bind(&a.body)
         .bind(a.updated_at)
         .map(|r: PgRow| a.id = r.get("id"))
-        .fetch_one(&mut txn)
+        .fetch_one(&mut *txn)
         .await
         {
             let res_err = ArticlesRepo::render_app_error(err, &a.slug);
@@ -222,7 +222,7 @@ impl ArticlesRepo {
         if !is_new {
             if let Err(err) = sqlx::query("DELETE FROM tags_articles WHERE article_id=$1")
                 .bind(article_id)
-                .execute(&mut *txn)
+                .execute(&mut **txn)
                 .await
             {
                 log::error!("Failed to delete tags: {}", err);
@@ -234,7 +234,7 @@ impl ArticlesRepo {
                 sqlx::query("INSERT INTO tags_articles (tag, article_id) VALUES ($1, $2)")
                     .bind(tag)
                     .bind(article_id)
-                    .execute(&mut *txn)
+                    .execute(&mut **txn)
                     .await
             {
                 log::error!("Failed to insert tags: {}", err);
