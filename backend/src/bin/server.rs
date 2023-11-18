@@ -22,7 +22,6 @@ use std::{
     process::exit,
     str::FromStr,
 };
-use tokio::signal::{self, unix::SignalKind};
 use tower_http::{
     cors::{AllowHeaders, Any, CorsLayer},
     trace::TraceLayer,
@@ -42,6 +41,11 @@ async fn main() {
         )
     }
     tracing_subscriber::fmt::init();
+
+    log::info!(
+        "The server is starting up. Its process id is {}.",
+        std::process::id()
+    );
 
     let app_cfg = get_config().expect("Failed to load the app config.");
 
@@ -115,13 +119,13 @@ async fn health_check(State(state): State<AppState>) -> impl IntoResponse {
 async fn shutdown_signal() {
     //
     let ctrl_c = async {
-        signal::ctrl_c()
+        tokio::signal::ctrl_c()
             .await
             .expect("Failed to init Ctrl+C handler")
     };
     #[cfg(unix)]
     let terminate = async {
-        signal::unix::signal(SignalKind::terminate())
+        signal::unix::signal(signal::unix::SignalKind::terminate())
             .expect("Failed to init signal handler")
             .recv()
             .await
@@ -139,7 +143,7 @@ async fn shutdown_signal() {
 #[derive(Parser, Debug)]
 #[clap(
     name = "server",
-    about = "The server side of Fullstack Rust RealWorld App project."
+    about = "The server side of Fullstack Rust RealWorld App solution."
 )]
 struct Opt {
     /// The HTTP listening address.
