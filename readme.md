@@ -15,10 +15,10 @@ We've gone to great lengths to adhere to the styleguides & best practices promot
 This project uses the classic three-tier architecture:
 
 ```
-╭─────────────╮           ╭──────────────╮           ╭──────────────╮
-│  Front-end  ├───────────▶   Back-end   ├───────────▶   Database   │
-│  (Dioxus)   │           │    (Axum)    │           │ (PostgreSQL) │
-╰─────────────╯           ╰──────────────╯           ╰──────────────╯
+  ╭───────────────╮       ╭────────────────╮       ╭────────────────╮
+  │   Front-end   │       │    Back-end    │       │     Database   │
+  │    (Dioxus)   ├──────►│     (Axum)     ├──────►│   (PostgreSQL) │
+  ╰───────────────╯       ╰────────────────╯       ╰────────────────╯
 ```
 
 <br/>
