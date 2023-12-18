@@ -1,31 +1,15 @@
-use axum::{
-    extract::State,
-    response::IntoResponse,
-    routing::{get, post, put},
-    Json, Router,
-};
-use axum_extra::routing::SpaRouter;
 use backend::{
     config::get_config,
     db::{init_db_pool, ping_db},
-    web_api::{
-        create_article, delete_article, follow_user, get_articles, get_current_user,
-        get_user_profile, login_user, register_user, unfollow_user, update_article,
-        update_current_user,
-    },
     AppState,
 };
 use clap::Parser;
-use serde_json::json;
 use std::{
     net::{IpAddr, Ipv6Addr, SocketAddr},
     process::exit,
     str::FromStr,
 };
-use tower_http::{
-    cors::{AllowHeaders, Any, CorsLayer},
-    trace::TraceLayer,
-};
+use backend::web_api::routes;
 
 #[tokio::main]
 async fn main() {
@@ -78,42 +62,6 @@ async fn main() {
         .with_graceful_shutdown(shutdown_signal())
         .await
         .expect("Unable to start server");
-}
-
-fn routes(state: AppState, assets_dir: String) -> Router {
-    //
-    let tracing_layer = TraceLayer::new_for_http();
-    let cors_layer = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_headers(AllowHeaders::any());
-
-    Router::new()
-        .route("/api/healthcheck", get(health_check))
-        .route("/api/users/login", post(login_user))
-        .route("/api/users", post(register_user))
-        .route("/api/user", get(get_current_user).put(update_current_user))
-        .route("/api/profiles/:username", get(get_user_profile))
-        .route(
-            "/api/profiles/:username/follow",
-            post(follow_user).delete(unfollow_user),
-        )
-        .route("/api/articles", get(get_articles).post(create_article))
-        .route(
-            "/api/articles/:slug",
-            put(update_article).delete(delete_article),
-        )
-        .layer(tracing_layer)
-        .layer(cors_layer)
-        .with_state(state)
-        .merge(SpaRouter::new("/assets", assets_dir))
-}
-
-async fn health_check(State(state): State<AppState>) -> impl IntoResponse {
-    //
-    match ping_db(&state.dbcp).await {
-        true => Json(json!({ "database": "ok" })),
-        false => Json(json!({ "database": "err" })),
-    }
 }
 
 async fn shutdown_signal() {
