@@ -11,16 +11,16 @@ if ! [ -x "$(command -v sqlx)" ]; then
   echo >&2 "Error: `sqlx` command is not available (not installed or in the PATH)."
   echo >&2 "Hint: `sqlx-cli` needs to be installed."
   echo >&2 "      To install it use:"
-  echo >&2 "    cargo install --version=0.6.1 sqlx-cli --no-default-features --features postgres,native-tls"
+  echo >&2 "    cargo install --version=0.7.3 sqlx-cli --no-default-features --features postgres,native-tls"
   echo >&2 ""
   exit 1
 fi
 
-DB_IMAGE="postgres:14"
+DB_IMAGE="postgres:16"
 
-# Check if a custom user has been set, otherwise default to 'postgres'.
+# Check if a custom user has been set, otherwise default to 'fs_rs_rwa'.
 DB_USER="${POSTGRES_USER:=fs_rs_rwa}"
-# Check if a custom password has been set, otherwise default to 'password'.
+# Check if a custom password has been set, otherwise default to 'fs_rs_rwa'.
 DB_PASSWORD="${POSTGRES_PASSWORD:=fs_rs_rwa}"
 # Check if a custom password has been set, otherwise default to 'fs_rs_rwa'.
 DB_NAME="${POSTGRES_DB:=fs_rs_rwa}"
@@ -53,7 +53,7 @@ fi
 
 # Keep polling Postgres for its readiness.
 until PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST}" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'; do
-  >&2 echo "Postgres is still unavailable - sleeping"
+  >&2 echo "Postgres is still unavailable. Sleeping ..."
   sleep 1
 done
 
@@ -65,4 +65,5 @@ export DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${
 sqlx database create
 
 sqlx migrate run
+
 echo "Completed the database migrations."

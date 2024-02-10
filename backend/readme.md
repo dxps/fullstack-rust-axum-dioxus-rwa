@@ -10,7 +10,7 @@ This is the server side of the project.
 
 This section describes how to start the database as a container and initialize it with the required database objects.
 
-Install the `sqlx-cli` using `cargo install --version=0.7.2 sqlx-cli --no-default-features --features native-tls,postgres`.
+Install the `sqlx-cli` using `cargo install --version=0.7.3 sqlx-cli --no-default-features --features native-tls,postgres`.
 
 #### On Linux
 
@@ -46,9 +46,9 @@ Applied 20221106211345/migrate create tags tables (13.8194ms)
 
 ## Start
 
-Use `./run_dev.sh` to run the server in _dev mode_ (recompile and restart on code changes).
+Use `./run_dev_watch.sh` (that uses `watchexec` and has the benefit of properly sending the termination signal to the server) or `./run_dev.sh` (that uses `cargo watch`) to run the server in _dev mode_ (recompile and restart on code changes). As prerequisites, see the details inside these files.
 
-The server supports a couple of options. Run `cargo run --bin server -- -h` to get the details.
+The server supports a couple of command line options. Run `cargo run --bin server -- -h` to get the details.
 
 <br/>
 
