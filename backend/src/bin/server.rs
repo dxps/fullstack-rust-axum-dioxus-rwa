@@ -1,3 +1,4 @@
+use backend::web_api::routes;
 use backend::{
     config::get_config,
     db::{init_db_pool, ping_db},
@@ -9,7 +10,6 @@ use std::{
     process::exit,
     str::FromStr,
 };
-use backend::web_api::routes;
 
 #[tokio::main]
 async fn main() {
@@ -71,13 +71,16 @@ async fn shutdown_signal() {
             .await
             .expect("Failed to init Ctrl+C handler")
     };
+
     #[cfg(unix)]
+    use tokio::signal::unix;
     let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
+        unix::signal(unix::SignalKind::terminate())
             .expect("Failed to init signal handler")
             .recv()
             .await
     };
+
     #[cfg(not(unix))]
     let terminate = std::future::pending();
 
